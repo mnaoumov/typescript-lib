@@ -4,7 +4,7 @@
  * A transformer that skips private properties.
  */
 
-import { Transformer } from './Transformer.ts';
+import { Transformer } from './transformer.ts';
 
 const PRIVATE_PROPERTY_PREFIX = '_';
 

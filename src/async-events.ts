@@ -6,7 +6,7 @@
 
 import type { Promisable } from 'type-fest';
 
-import { filterInPlace } from './Array.ts';
+import { filterInPlace } from './array.ts';
 
 /**
  * Async event reference.

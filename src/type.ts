@@ -4,7 +4,7 @@
  * Type utilities.
  */
 
-import { castTo } from './ObjectUtils.ts';
+import { castTo } from './object-utils.ts';
 
 /**
  * A type that represents the keys of an object as strings and asserts that all keys are present in a list of keys.

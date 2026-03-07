@@ -4,8 +4,8 @@
  * Contains utility functions for error handling.
  */
 
-import { AsyncEvents } from './AsyncEvents.ts';
-import { ensureNonNullable } from './TypeGuards.ts';
+import { AsyncEvents } from './async-events.ts';
+import { ensureNonNullable } from './type-guards.ts';
 
 const ASYNC_ERROR_EVENT = 'asyncError';
 

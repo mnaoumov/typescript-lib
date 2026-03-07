@@ -11,11 +11,11 @@ import {
   abortSignalNever,
   abortSignalTimeout,
   waitForAbort
-} from './AbortController.ts';
+} from './abort-controller.ts';
 import {
   getLibDebugger,
   printWithStackTrace
-} from './Debug.ts';
+} from './debug.ts';
 import {
   ASYNC_WRAPPER_ERROR_MESSAGE,
   CustomStackTraceError,
@@ -23,10 +23,10 @@ import {
   getStackTrace,
   printError,
   SilentError
-} from './Error.ts';
-import { noop } from './Function.ts';
-import { normalizeOptionalProperties } from './ObjectUtils.ts';
-import { assertNonNullable } from './TypeGuards.ts';
+} from './error.ts';
+import { noop } from './function.ts';
+import { normalizeOptionalProperties } from './object-utils.ts';
+import { assertNonNullable } from './type-guards.ts';
 
 /**
  * A type representing a function that resolves a {@link Promise}.

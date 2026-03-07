@@ -4,13 +4,13 @@
  * Contains utility functions for string operations.
  */
 
-import type { MaybeReturn } from './Type.ts';
-import type { ValueProvider } from './ValueProvider.ts';
+import type { MaybeReturn } from './type.ts';
+import type { ValueProvider } from './value-provider.ts';
 
-import { abortSignalNever } from './AbortController.ts';
-import { throwExpression } from './Error.ts';
-import { escapeRegExp } from './RegExp.ts';
-import { resolveValue } from './ValueProvider.ts';
+import { abortSignalNever } from './abort-controller.ts';
+import { throwExpression } from './error.ts';
+import { escapeRegExp } from './reg-exp.ts';
+import { resolveValue } from './value-provider.ts';
 
 /**
  * A synchronous/asynchronous function that generates replacement strings, or a string to replace with.

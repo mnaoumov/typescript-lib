@@ -4,7 +4,7 @@
  * Contains utility functions for enums.
  */
 
-import { ensureNonNullable } from './TypeGuards.ts';
+import { ensureNonNullable } from './type-guards.ts';
 
 /**
  * Get the key of an enum value.

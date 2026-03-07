@@ -7,8 +7,8 @@
 import {
   assertNonNullable,
   ensureNonNullable
-} from '../TypeGuards.ts';
-import { Transformer } from './Transformer.ts';
+} from '../type-guards.ts';
+import { Transformer } from './transformer.ts';
 
 /**
  * A transformer that combines multiple transformers.

@@ -4,7 +4,7 @@
  * A base class for transformers that can transform and restore a specific type.
  */
 
-import { Transformer } from './Transformer.ts';
+import { Transformer } from './transformer.ts';
 
 /**
  * A transformer that can transform and restore a specific type.

@@ -9,7 +9,7 @@ import pathBrowserify from 'path-browserify';
 import {
   ensureStartsWith,
   replaceAll
-} from './String.ts';
+} from './string.ts';
 
 const WINDOWS_POSIX_LIKE_PATH_REG_EXP = /[a-zA-Z]:\/[^:]*$/;
 

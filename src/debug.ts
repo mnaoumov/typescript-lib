@@ -8,15 +8,15 @@ import type { Debugger } from 'debug';
 
 import debug from 'debug';
 
-import type { DebugController } from './DebugController.ts';
+import type { DebugController } from './debug-controller.ts';
 
-import { CustomStackTraceError } from './Error.ts';
-import { LIBRARY_NAME } from './Library.ts';
-import { getObsidianDevUtilsState } from './obsidian/App.ts';
+import { CustomStackTraceError } from './error.ts';
+import { LIBRARY_NAME } from './library.ts';
+import { getObsidianDevUtilsState } from './obsidian/app.ts';
 import {
   getPluginId,
   NO_PLUGIN_ID_INITIALIZED
-} from './obsidian/Plugin/PluginId.ts';
+} from './obsidian/plugin/plugin-id.ts';
 
 const NAMESPACE_SEPARATOR = ',';
 const NEGATED_NAMESPACE_PREFIX = '-';

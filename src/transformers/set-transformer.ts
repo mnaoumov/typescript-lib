@@ -4,7 +4,7 @@
  * A transformer that can transform a Set to an array and back.
  */
 
-import { TypedTransformer } from './TypedTransformer.ts';
+import { TypedTransformer } from './typed-transformer.ts';
 
 /**
  * A transformer that can transform a Set to an array and back.

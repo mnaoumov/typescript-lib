@@ -4,7 +4,7 @@
  * Contains utility functions for type guards.
  */
 
-import { noop } from './Function.ts';
+import { noop } from './function.ts';
 
 /**
  * A type that represents a generic object.

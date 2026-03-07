@@ -6,7 +6,7 @@
 
 import type { Promisable } from 'type-fest';
 
-import { abortSignalNever } from './AbortController.ts';
+import { abortSignalNever } from './abort-controller.ts';
 
 /**
  * Value provider that can either be a direct value of type {@link Value} or a function that returns a value of type {@link Value}.

@@ -4,8 +4,8 @@
  * A transformer that can transform a TwoWayMap to an array of entries and back.
  */
 
-import { TwoWayMap } from '../TwoWayMap.ts';
-import { TypedTransformer } from './TypedTransformer.ts';
+import { TwoWayMap } from '../two-way-map.ts';
+import { TypedTransformer } from './typed-transformer.ts';
 
 type MapEntry = readonly [key: unknown, value: unknown];
 

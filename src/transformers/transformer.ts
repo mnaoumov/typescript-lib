@@ -4,9 +4,9 @@
  * A base class for transformers.
  */
 
-import type { GenericObject } from '../TypeGuards.ts';
+import type { GenericObject } from '../type-guards.ts';
 
-import { getAllKeys } from '../ObjectUtils.ts';
+import { getAllKeys } from '../object-utils.ts';
 
 /**
  * A wrapper for a transformed value.

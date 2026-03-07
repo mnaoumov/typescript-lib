@@ -4,7 +4,7 @@
  * AbortController utilities.
  */
 
-import { noop } from './Function.ts';
+import { noop } from './function.ts';
 
 /**
  * A constant representing an infinite timeout.

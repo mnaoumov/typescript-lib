@@ -4,7 +4,7 @@
  * A transformer that can transform a Map to an array of entries and back.
  */
 
-import { TypedTransformer } from './TypedTransformer.ts';
+import { TypedTransformer } from './typed-transformer.ts';
 
 type MapEntry = readonly [key: unknown, value: unknown];
 

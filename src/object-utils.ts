@@ -14,15 +14,15 @@ import type {
   ExactMembers,
   MaybeReturn,
   StringKeys
-} from './Type.ts';
-import type { GenericObject } from './TypeGuards.ts';
+} from './type.ts';
+import type { GenericObject } from './type-guards.ts';
 
-import { errorToString } from './Error.ts';
-import { replaceAll } from './String.ts';
+import { errorToString } from './error.ts';
+import { replaceAll } from './string.ts';
 import {
   ensureGenericObject,
   ensureNonNullable
-} from './TypeGuards.ts';
+} from './type-guards.ts';
 
 /**
  * Specifies how functions should be handled in the JSON output.
