@@ -42,15 +42,6 @@ import {
   assertNonNullable
 } from './type-guards.ts';
 
-// Re-exported so `obsidian-dev-utils/async` keeps serving them. They live in the test support now: production code
-// only reports to the hook that `async-operation-tracking.ts` installs.
-export {
-  disableAsyncOperationTracking,
-  enableAsyncOperationTracking,
-  isAsyncOperationTrackingEnabled,
-  waitForAllAsyncOperations
-} from './async-operation-tracking.ts';
-
 /**
  * Parameters for {@link invokeAsyncSafelyAfterDelay}.
  */

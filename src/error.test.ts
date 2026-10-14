@@ -1,3 +1,4 @@
+import { strictProxy } from '@mnaoumov/typescript-test-toolkit/strict-proxy';
 import {
   afterEach,
   describe,
@@ -13,6 +14,7 @@ import {
   drainCollectedUnhandledAsyncErrors,
   emitAsyncErrorEvent,
   errorToString,
+  ErrorWrapper,
   getStackTrace,
   isAsyncErrorIgnoreContextActive,
   printError,
@@ -23,7 +25,6 @@ import {
   stopCollectingUnhandledAsyncErrors,
   throwExpression
 } from './error.ts';
-import { strictProxy } from './strict-proxy.ts';
 import { assertNonNullable } from './type-guards.ts';
 
 describe('ASYNC_WRAPPER_ERROR_MESSAGE', () => {
@@ -255,6 +256,27 @@ describe('SilentError', () => {
   it('should include SilentError in the stack trace', () => {
     const error = new SilentError('test');
     expect(error.stack).toContain('SilentError');
+  });
+});
+
+describe('ErrorWrapper', () => {
+  it('should wrap a non-Error value, keeping it as the cause', () => {
+    const error = new ErrorWrapper('boom');
+    expect(error).toBeInstanceOf(Error);
+    expect(error.name).toBe('ErrorWrapper');
+    expect(error.message).toBe('A non-Error value was thrown: boom');
+    expect(error.cause).toBe('boom');
+  });
+
+  it('should return an Error unchanged from create', () => {
+    const original = new Error('original');
+    expect(ErrorWrapper.create(original)).toBe(original);
+  });
+
+  it('should wrap a non-Error value from create', () => {
+    const wrapped = ErrorWrapper.create(42);
+    expect(wrapped).toBeInstanceOf(ErrorWrapper);
+    expect(wrapped.cause).toBe(42);
   });
 });
 

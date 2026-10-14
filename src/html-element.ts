@@ -19,6 +19,69 @@ import { ensureNonNullable } from './type-guards.ts';
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
 /**
+ * The element information {@link createElAsync} and its siblings apply: the element-type-agnostic subset of
+ * Obsidian's `DomElementInfo`, declared here so this module needs no Obsidian typings. An Obsidian
+ * `DomElementInfo` value is assignable to it.
+ */
+export interface CreateHtmlElementInfo {
+  /**
+   * The attributes to set; `null` removes the attribute.
+   */
+  readonly attr?: Record<string, boolean | null | number | string>;
+
+  /**
+   * The CSS class or classes.
+   */
+  readonly cls?: string | string[];
+
+  /**
+   * The parent to insert the element into.
+   */
+  readonly parent?: Node;
+
+  /**
+   * Whether to insert the element as the parent's first child instead of its last.
+   */
+  readonly prepend?: boolean;
+
+  /**
+   * The text content.
+   */
+  readonly text?: DocumentFragment | string;
+
+  /**
+   * The tooltip text.
+   */
+  readonly title?: string;
+}
+
+/**
+ * The SVG element information {@link createSvgAsync} applies: the subset of Obsidian's `SvgElementInfo` it
+ * supports, declared here so this module needs no Obsidian typings.
+ */
+export interface CreateSvgElementInfo {
+  /**
+   * The attributes to set; `null` removes the attribute.
+   */
+  readonly attr?: Record<string, boolean | null | number | string>;
+
+  /**
+   * The CSS class or classes.
+   */
+  readonly cls?: string | string[];
+
+  /**
+   * The parent to insert the element into.
+   */
+  readonly parent?: Node;
+
+  /**
+   * Whether to insert the element as the parent's first child instead of its last.
+   */
+  readonly prepend?: boolean;
+}
+
+/**
  * A HTML element that can be validated.
  */
 export interface ValidatorElement extends HTMLElement {
@@ -55,7 +118,7 @@ export interface ValidatorElement extends HTMLElement {
  * @returns A {@link Promise} that resolves to the div.
  */
 export async function createDivAsync(
-  o?: DomElementInfo | string,
+  o?: CreateHtmlElementInfo | string,
   callback?: (element: HTMLDivElement) => Promisable<void>
 ): Promise<HTMLDivElement> {
   const div = createHtmlElement('div', o);
@@ -71,11 +134,11 @@ export async function createDivAsync(
  * @param o - The element information.
  * @param callback - The callback to call when the element is created.
  * @returns A {@link Promise} that resolves to the element.
- * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link createEl} (or createSvg, correspondingly).
+ * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `createEl` (or createSvg, correspondingly).
  */
 export async function createElAsync<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-  o?: DomElementInfo | string,
+  o?: CreateHtmlElementInfo | string,
   callback?: (element: HTMLElementTagNameMap[K]) => Promisable<void>
 ): Promise<HTMLElementTagNameMap[K]> {
   const element = createHtmlElement(tag, o);
@@ -104,7 +167,7 @@ export async function createFragmentAsync(callback?: (element: DocumentFragment)
  * @returns A {@link Promise} that resolves to the span.
  */
 export async function createSpanAsync(
-  o?: DomElementInfo | string,
+  o?: CreateHtmlElementInfo | string,
   callback?: (element: HTMLSpanElement) => Promisable<void>
 ): Promise<HTMLSpanElement> {
   const span = createHtmlElement('span', o);
@@ -120,11 +183,11 @@ export async function createSpanAsync(
  * @param o - The svg information.
  * @param callback - The callback to call when the svg is created.
  * @returns A {@link Promise} that resolves to the svg.
- * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link createSvg} (or createEl, correspondingly).
+ * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `createSvg` (or createEl, correspondingly).
  */
 export async function createSvgAsync<K extends keyof SVGElementTagNameMap>(
   tag: K,
-  o?: string | SvgElementInfo,
+  o?: CreateSvgElementInfo | string,
   callback?: (element: SVGElementTagNameMap[K]) => Promisable<void>
 ): Promise<SVGElementTagNameMap[K]> {
   const svg = createSvgElement(tag, o);
@@ -362,7 +425,7 @@ export function waitUntilConnected(element: HTMLElement): Promise<void> {
 }
 
 /**
- * Applies the element-type-agnostic subset of {@link DomElementInfo} that Obsidian's `createEl`
+ * Applies the element-type-agnostic subset of Obsidian's `DomElementInfo` that its `createEl`
  * supports — `cls`, `text`, `attr`, `title`, and `parent`/`prepend`. The element-type-specific
  * fields (`value`, `type`, `placeholder`, `href`) and the `on*` event-handler keys are intentionally
  * NOT ported (no internal caller needs them); extend this if a consumer does — and revalidate against
@@ -371,8 +434,8 @@ export function waitUntilConnected(element: HTMLElement): Promise<void> {
  * @param element - The element to apply the info to.
  * @param o - The element info (or a bare class string).
  */
-function applyDomElementInfo(element: HTMLElement, o: DomElementInfo | string | undefined): void {
-  const info: DomElementInfo = typeof o === 'string' ? { cls: o } : o ?? {};
+function applyDomElementInfo(element: HTMLElement, o: CreateHtmlElementInfo | string | undefined): void {
+  const info: CreateHtmlElementInfo = typeof o === 'string' ? { cls: o } : o ?? {};
 
   if (info.cls !== undefined) {
     element.className = Array.isArray(info.cls) ? info.cls.join(' ') : info.cls;
@@ -389,16 +452,16 @@ function applyDomElementInfo(element: HTMLElement, o: DomElementInfo | string | 
   insertIntoParent(element, info);
 }
 
-function createHtmlElement<K extends keyof HTMLElementTagNameMap>(tag: K, o?: DomElementInfo | string): HTMLElementTagNameMap[K] {
+function createHtmlElement<K extends keyof HTMLElementTagNameMap>(tag: K, o?: CreateHtmlElementInfo | string): HTMLElementTagNameMap[K] {
   // eslint-disable-next-line obsidianmd/prefer-create-el -- Agnostic module.
   const element = document.createElement(tag);
   applyDomElementInfo(element, o);
   return element;
 }
 
-function createSvgElement<K extends keyof SVGElementTagNameMap>(tag: K, o?: string | SvgElementInfo): SVGElementTagNameMap[K] {
+function createSvgElement<K extends keyof SVGElementTagNameMap>(tag: K, o?: CreateSvgElementInfo | string): SVGElementTagNameMap[K] {
   const svg = document.createElementNS(SVG_NAMESPACE, tag);
-  const info: SvgElementInfo = typeof o === 'string' ? { cls: o } : o ?? {};
+  const info: CreateSvgElementInfo = typeof o === 'string' ? { cls: o } : o ?? {};
 
   if (info.cls !== undefined) {
     if (Array.isArray(info.cls)) {
@@ -423,7 +486,7 @@ function getNodeWindow(node: Node): typeof globalThis & Window {
   return node.ownerDocument?.defaultView ?? window;
 }
 
-function insertIntoParent(element: Element, info: DomElementInfo | SvgElementInfo): void {
+function insertIntoParent(element: Element, info: CreateHtmlElementInfo | CreateSvgElementInfo): void {
   if (!info.parent) {
     return;
   }
@@ -442,7 +505,7 @@ function isInstanceOf<T extends Node>(node: Node, ctor: abstract new (...$argume
   return node instanceof ctor;
 }
 
-function setElementAttributes(element: Element, attribute: NonNullable<DomElementInfo['attr']>): void {
+function setElementAttributes(element: Element, attribute: NonNullable<CreateHtmlElementInfo['attr']>): void {
   for (const [name, value] of Object.entries(attribute)) {
     // eslint-disable-next-line unicorn/prefer-toggle-attribute -- `toggleAttribute` only ever sets the empty string, so it cannot carry `String(value)`. The rule matches the remove/set shape without seeing that the value is what this branch exists to write.
     if (value === null) {

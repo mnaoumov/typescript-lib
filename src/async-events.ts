@@ -106,7 +106,7 @@ export interface AsyncEventSource<EventMap extends EventMapConstraint<EventMap> 
    * @param thisArgument - The context passed as `this` to the `callback`.
    * @returns A reference to the event listener.
    *
-   * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+   * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
    *
    * @example
    * ```ts
@@ -132,7 +132,7 @@ export interface AsyncEventSource<EventMap extends EventMapConstraint<EventMap> 
    * @param thisArgument - The context passed as `this` to the `callback`.
    * @returns A reference to the event listener.
    *
-   * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+   * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
    *
    * @example
    * ```ts
@@ -387,7 +387,7 @@ export abstract class AsyncEventsBase<EventMap extends EventMapConstraint<EventM
    * @param thisArgument - The context passed as `this` to the `callback`.
    * @returns A reference to the event listener.
    *
-   * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+   * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
    *
    * @example
    * ```ts
@@ -429,7 +429,7 @@ export abstract class AsyncEventsBase<EventMap extends EventMapConstraint<EventM
    * @param thisArgument - The context passed as `this` to the `callback`.
    * @returns A reference to the event listener.
    *
-   * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+   * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
    *
    * @example
    * ```ts
@@ -532,7 +532,7 @@ export abstract class AsyncEventsBase<EventMap extends EventMapConstraint<EventM
 /**
  * A class that extends {@link AsyncEventsBase} and provides public methods for triggering events.
  *
- * This class exists as parity with {@link obsidian#Events}. But exposing publicly `trigger()` methods violates encapsulation.
+ * This class exists as parity with Obsidian's `Events`. But exposing publicly `trigger()` methods violates encapsulation.
  *
  * Avoid using it in favor of {@link AsyncEventsBase}.
  *
@@ -650,7 +650,7 @@ export function mixinAsyncEvents<EventMap extends EventMapConstraint<EventMap> =
        * @param thisArgument - The context passed as `this` to the `callback`.
        * @returns A reference to the event listener.
        *
-       * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+       * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
        */
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
       public on<EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
@@ -671,7 +671,7 @@ export function mixinAsyncEvents<EventMap extends EventMapConstraint<EventMap> =
        * @param thisArgument - The context passed as `this` to the `callback`.
        * @returns A reference to the event listener.
        *
-       * @remarks Not refactored to parameter-object pattern, to keep the parity with {@link obsidian#Events#on} (or once, correspondingly).
+       * @remarks Not refactored to parameter-object pattern, to keep the parity with Obsidian's `Events.on` (or once, correspondingly).
        */
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
       public once<EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(

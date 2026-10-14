@@ -46,6 +46,18 @@ describe('typescript-lib-state', () => {
     expect(getTypescriptLibStateSlot()).toStrictEqual({ values: { key: wrapper }, version: TYPESCRIPT_LIB_STATE_VERSION });
   });
 
+  it('should create the slot on first use when the realm global has none', () => {
+    // eslint-disable-next-line obsidianmd/no-global-this -- The shared state intentionally lives on the realm global.
+    const global = castTo<Record<symbol, unknown>>(globalThis);
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Removing the slot is the point of this test.
+    delete global[TYPESCRIPT_LIB_STATE_KEY];
+
+    const slot = getTypescriptLibStateSlot();
+
+    expect(slot).toStrictEqual({ values: {}, version: TYPESCRIPT_LIB_STATE_VERSION });
+    expect(global[TYPESCRIPT_LIB_STATE_KEY]).toBe(slot);
+  });
+
   it('should share the slot with a second loaded copy of the module', async () => {
     const wrapper = getTypescriptLibState('key', 'first');
 

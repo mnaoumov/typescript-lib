@@ -23,7 +23,7 @@ describe('AsyncEvents', () => {
 
   beforeEach(() => {
     events = new AsyncEvents();
-    vi.spyOn(activeWindow, 'setTimeout').mockReturnValue(0);
+    vi.spyOn(window, 'setTimeout').mockReturnValue(castTo<ReturnType<typeof window.setTimeout>>(0));
   });
 
   afterEach(() => {
@@ -489,7 +489,7 @@ describe('mixinAsyncEvents', () => {
 
   beforeEach(() => {
     instance = new MixedIn();
-    vi.spyOn(activeWindow, 'setTimeout').mockReturnValue(0);
+    vi.spyOn(window, 'setTimeout').mockReturnValue(castTo<ReturnType<typeof window.setTimeout>>(0));
   });
 
   afterEach(() => {

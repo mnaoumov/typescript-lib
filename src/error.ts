@@ -168,7 +168,7 @@ export class SilentError extends Error {
  * Empties the collection window opened by {@link startCollectingUnhandledAsyncErrors} and returns what it
  * held, leaving the window **open** so errors emitted afterwards keep being collected.
  *
- * This is what {@link setup!setup}'s `beforeEach` / `afterEach` use, rather than
+ * This is what the test setup's (`@mnaoumov/typescript-test-toolkit/setup`) `beforeEach` / `afterEach` use, rather than
  * {@link stopCollectingUnhandledAsyncErrors}: an async error emitted in the gap between two tests (e.g. by a
  * `setTimeout` the test left pending) would otherwise land on a closed window and vanish unreported.
  *
