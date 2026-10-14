@@ -1,4 +1,10 @@
 import {
+  disableAsyncOperationTracking,
+  enableAsyncOperationTracking,
+  isAsyncOperationTrackingEnabled,
+  waitForAllAsyncOperations
+} from '@mnaoumov/typescript-test-toolkit/async-operation-tracking';
+import {
   afterEach,
   beforeEach,
   describe,
@@ -18,13 +24,10 @@ import {
   chain,
   convertAsyncToSync,
   convertSyncToAsync,
-  disableAsyncOperationTracking,
-  enableAsyncOperationTracking,
   handleSilentError,
   ignoreError,
   invokeAsyncSafely,
   invokeAsyncSafelyAfterDelay,
-  isAsyncOperationTrackingEnabled,
   marksAsTerminateRetry,
   neverEnds,
   nextTickAsync,
@@ -39,8 +42,7 @@ import {
   setTimeoutAsync,
   sleep,
   timeout,
-  toArray,
-  waitForAllAsyncOperations
+  toArray
 } from './async.ts';
 import {
   registerAsyncErrorEventHandler,
@@ -1312,7 +1314,7 @@ describe('Async', () => {
 
   describe('async operation tracking re-exports', () => {
     it('should keep serving the tracking functions from the async module', async () => {
-      const trackingModule = await import('./async-operation-tracking.ts');
+      const trackingModule = await import('@mnaoumov/typescript-test-toolkit/async-operation-tracking');
       expect(disableAsyncOperationTracking).toBe(trackingModule.disableAsyncOperationTracking);
       expect(enableAsyncOperationTracking).toBe(trackingModule.enableAsyncOperationTracking);
       expect(isAsyncOperationTrackingEnabled).toBe(trackingModule.isAsyncOperationTrackingEnabled);

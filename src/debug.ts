@@ -14,10 +14,7 @@ import {
   CustomStackTraceError,
   getStackTrace
 } from './error.ts';
-import {
-  Library,
-  LIBRARY_NAME
-} from './library.ts';
+import { Library } from './library.ts';
 import { getTypescriptLibState } from './typescript-lib-state.ts';
 
 const NAMESPACE_SEPARATOR = ',';
@@ -74,10 +71,10 @@ interface LogWithCallerParams {
 }
 
 /**
- * Enables the debuggers for the `obsidian-dev-utils` library.
+ * Enables the debuggers for the library (under its debug namespace, see `Library.debugNamespace`).
  */
 export function enableLibraryDebuggers(): void {
-  enableNamespaces([LIBRARY_NAME, `${LIBRARY_NAME}:*`]);
+  enableNamespaces([Library.debugNamespace, `${Library.debugNamespace}:*`]);
 }
 
 /**
@@ -123,13 +120,13 @@ export function getDebugger(namespace: string, framesToSkip = 0): Debugger {
 }
 
 /**
- * Returns a debugger instance for the `obsidian-dev-utils` library.
+ * Returns a debugger instance for the library (under its debug namespace, see `Library.debugNamespace`).
  *
  * @param namespace - The namespace for the debugger instance.
- * @returns A debugger instance for the `obsidian-dev-utils` library.
+ * @returns A debugger instance for the library (under its debug namespace, see `Library.debugNamespace`).
  */
 export function getLibDebugger(namespace: string): Debugger {
-  return getDebugger(`${Library.debugPrefixNamespace}${LIBRARY_NAME}:${namespace}`);
+  return getDebugger(`${Library.debugPrefixNamespace}${Library.debugNamespace}:${namespace}`);
 }
 
 /**

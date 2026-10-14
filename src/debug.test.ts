@@ -168,22 +168,22 @@ describe('Debug', () => {
   });
 
   describe('enableLibraryDebuggers', () => {
-    it('should enable the obsidian-dev-utils namespace', () => {
+    it('should enable the typescript-lib namespace', () => {
       debug.enable('');
       enableLibraryDebuggers();
-      expect(debug.enabled('obsidian-dev-utils')).toBe(true);
+      expect(debug.enabled('typescript-lib')).toBe(true);
     });
 
-    it('should enable the obsidian-dev-utils:* wildcard namespace', () => {
+    it('should enable the typescript-lib:* wildcard namespace', () => {
       debug.enable('');
       enableLibraryDebuggers();
-      expect(debug.enabled('obsidian-dev-utils:something')).toBe(true);
+      expect(debug.enabled('typescript-lib:something')).toBe(true);
     });
 
-    it('should enable deeply nested obsidian-dev-utils sub-namespaces', () => {
+    it('should enable deeply nested typescript-lib sub-namespaces', () => {
       debug.enable('');
       enableLibraryDebuggers();
-      expect(debug.enabled('obsidian-dev-utils:foo:bar')).toBe(true);
+      expect(debug.enabled('typescript-lib:foo:bar')).toBe(true);
     });
 
     it('should not enable unrelated namespaces', () => {
@@ -263,18 +263,24 @@ describe('Debug', () => {
   describe('getLibDebugger', () => {
     it('should return a debugger with library namespace prefix when no prefix namespace is set', () => {
       const dbg = getLibDebugger('my-module');
-      expect(dbg.namespace).toBe('obsidian-dev-utils:my-module');
+      expect(dbg.namespace).toBe('typescript-lib:my-module');
     });
 
     it('should include the debug prefix namespace when one is set', () => {
-      Library.init({ cssClassScope: '', debugPrefixNamespace: 'test-plugin:', shouldPrintStackTrace: false });
+      Library.init({ debugPrefixNamespace: 'test-plugin:', shouldPrintStackTrace: false });
+      const dbg = getLibDebugger('my-module');
+      expect(dbg.namespace).toBe('test-plugin:typescript-lib:my-module');
+    });
+
+    it('should use the debug namespace the host injected', () => {
+      Library.init({ debugNamespace: 'obsidian-dev-utils', debugPrefixNamespace: 'test-plugin:', shouldPrintStackTrace: false });
       const dbg = getLibDebugger('my-module');
       expect(dbg.namespace).toBe('test-plugin:obsidian-dev-utils:my-module');
     });
 
     it('should not prepend a prefix when the prefix namespace is empty', () => {
       const dbg = getLibDebugger('some-module');
-      expect(dbg.namespace).toBe('obsidian-dev-utils:some-module');
+      expect(dbg.namespace).toBe('typescript-lib:some-module');
     });
   });
 
@@ -307,7 +313,7 @@ describe('Debug', () => {
     });
 
     it('should include stack trace info when stack traces are enabled', () => {
-      Library.init({ cssClassScope: '', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+      Library.init({ debugPrefixNamespace: '', shouldPrintStackTrace: true });
       debug.enable('print-test-obsidian');
       const spy = castTo<Debugger>(vi.fn());
       spy.enabled = true;
@@ -333,7 +339,7 @@ describe('Debug', () => {
     });
 
     it('should call console.debug with stack trace when stack traces are enabled', () => {
-      Library.init({ cssClassScope: '', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+      Library.init({ debugPrefixNamespace: '', shouldPrintStackTrace: true });
       const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
       const namespace = 'log-caller-inside';
       debug.enable(namespace);
@@ -343,7 +349,7 @@ describe('Debug', () => {
     });
 
     it('should open the logged stack trace on the caller frame', () => {
-      Library.init({ cssClassScope: '', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+      Library.init({ debugPrefixNamespace: '', shouldPrintStackTrace: true });
       const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
       const namespace = 'log-caller-frame';
       debug.enable(namespace);
@@ -362,7 +368,7 @@ describe('Debug', () => {
       // The JavaScriptCore shape: frames only, `name@url:line:col`.
       Error.prepareStackTrace = (_error, callSites): string => callSites.map((callSite) => `${callSite.getFunctionName() ?? ''}@${callSite.getFileName() ?? ''}:${String(callSite.getLineNumber())}`).join('\n');
       try {
-        Library.init({ cssClassScope: '', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+        Library.init({ debugPrefixNamespace: '', shouldPrintStackTrace: true });
         const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
         const namespace = 'log-caller-frame-no-header';
         debug.enable(namespace);
@@ -380,7 +386,7 @@ describe('Debug', () => {
     });
 
     it('should point the placeholder error at the debug guide the host supplied', () => {
-      Library.init({ cssClassScope: '', debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+      Library.init({ debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: true });
       const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
       const namespace = 'log-caller-guide';
       debug.enable(namespace);
@@ -391,7 +397,7 @@ describe('Debug', () => {
     });
 
     it('should name no guide in the placeholder error when the host supplied none', () => {
-      Library.init({ cssClassScope: '', debugPrefixNamespace: '', shouldPrintStackTrace: true });
+      Library.init({ debugPrefixNamespace: '', shouldPrintStackTrace: true });
       const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
       const namespace = 'log-caller-no-guide';
       debug.enable(namespace);
@@ -444,7 +450,7 @@ describe('Debug', () => {
     });
 
     it('should point at the debug guide the host supplied', () => {
-      Library.init({ cssClassScope: '', debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: false });
+      Library.init({ debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: false });
       vi.spyOn(console, 'debug').mockImplementation(noop);
       debug.enable('guide-plugin');
       showInitialDebugMessage('guide-plugin');

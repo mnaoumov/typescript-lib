@@ -1,31 +1,37 @@
 /**
  * @file
  *
- * Helpers for working with the `obsidian-dev-utils` library.
+ * Helpers for working with the `@mnaoumov/typescript-lib` library.
  */
 
 /**
- * A name of the `obsidian-dev-utils` library.
+ * A name of the `@mnaoumov/typescript-lib` library.
  */
-export const LIBRARY_NAME = 'obsidian-dev-utils';
+export const LIBRARY_NAME = '@mnaoumov/typescript-lib';
+
+/**
+ * The debug namespace the library's own debuggers live under until {@link Library.init} supplies another.
+ */
+export const DEFAULT_DEBUG_NAMESPACE = 'typescript-lib';
 
 /**
  * Parameters for {@link Library.init}.
  *
- * These are purely cosmetic values the host plugin injects once at initialization — deliberately NOT
- * the plugin ID itself, so the agnostic core cannot reconstruct a capability from them.
+ * These are purely cosmetic values the host injects once at initialization, so the library itself carries
+ * no knowledge of who hosts it.
  */
 export interface LibraryInitParams {
-  /**
-   * The per-plugin CSS class scope applied alongside the library class by `addPluginCssClasses`.
-   */
-  readonly cssClassScope: string;
-
   /**
    * The URL of the guide explaining how to turn debug messages on and off, named in the library's debug messages.
    * Without one, the messages name no guide.
    */
   readonly debugGuideUrl?: string;
+
+  /**
+   * The namespace the library's own debuggers live under. Defaults to {@link DEFAULT_DEBUG_NAMESPACE}.
+   * A host that publishes its own debug namespace to its users passes it here, so their filters keep matching.
+   */
+  readonly debugNamespace?: string;
 
   /**
    * The namespace prefix prepended to the library's debug namespaces (e.g. `${pluginId}:`).
@@ -39,30 +45,19 @@ export interface LibraryInitParams {
 }
 
 const DEFAULT_PARAMS: LibraryInitParams = {
-  cssClassScope: '',
   debugPrefixNamespace: '',
   shouldPrintStackTrace: false
 };
 
 /**
- * The single, deterministic initialization entry point for the `obsidian-dev-utils` library.
+ * The single, deterministic initialization entry point for the `@mnaoumov/typescript-lib` library.
  *
- * The host plugin calls {@link Library.init} exactly once (via `initPluginContext`) to push the
- * cosmetic per-plugin configuration; the Obsidian-runtime-agnostic core only reads it through the
- * getters. Calling {@link Library.init} more than once throws — {@link Library.resetToDefault} clears
- * the state (e.g. between tests, or on plugin unload) and allows re-initialization.
+ * The host calls {@link Library.init} exactly once to push its cosmetic configuration; the library only
+ * reads it through the getters. Calling {@link Library.init} more than once throws —
+ * {@link Library.resetToDefault} clears the state (e.g. between tests, or on unload) and allows
+ * re-initialization.
  */
 class LibraryContext {
-  /**
-   * The per-plugin CSS class scope applied alongside the library class by `addPluginCssClasses`.
-   * Empty until {@link init} is called.
-   *
-   * @returns The CSS class scope.
-   */
-  public get cssClassScope(): string {
-    return this.params.cssClassScope;
-  }
-
   /**
    * The URL of the guide explaining how to turn debug messages on and off. Empty until {@link init} is called with one.
    *
@@ -70,6 +65,15 @@ class LibraryContext {
    */
   public get debugGuideUrl(): string {
     return this.params.debugGuideUrl ?? '';
+  }
+
+  /**
+   * The namespace the library's own debuggers live under.
+   *
+   * @returns The debug namespace.
+   */
+  public get debugNamespace(): string {
+    return this.params.debugNamespace ?? DEFAULT_DEBUG_NAMESPACE;
   }
 
   /**
@@ -95,8 +99,8 @@ class LibraryContext {
   private params: LibraryInitParams = { ...DEFAULT_PARAMS };
 
   /**
-   * Initializes the library with the host plugin's cosmetic configuration. Must be called exactly
-   * once; calling it again before {@link resetToDefault} throws.
+   * Initializes the library with the host's cosmetic configuration. Must be called exactly once; calling it
+   * again before {@link resetToDefault} throws.
    *
    * @param params - The cosmetic configuration to inject.
    */
