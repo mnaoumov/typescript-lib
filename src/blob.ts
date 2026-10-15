@@ -74,7 +74,6 @@ export async function blobToJpegArrayBuffer(blob: Blob, jpegQuality: number, opt
     image.src = dataUrl;
 
     function handleLoad(): void {
-      // eslint-disable-next-line obsidianmd/prefer-create-el -- Agnostic module.
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       assertNonNullable(context, 'Could not get 2D context.');

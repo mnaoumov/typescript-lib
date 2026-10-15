@@ -240,7 +240,6 @@ export function isAsyncErrorIgnoreContextActive(): boolean {
  * @param console - The console to print to (default: `globalThis.console`).
  */
 export function printError(error: unknown, console?: Console): void {
-  // eslint-disable-next-line obsidianmd/no-global-this -- Actively use globalThis.
   console ??= globalThis.console;
   console.error(errorToString(error));
 }

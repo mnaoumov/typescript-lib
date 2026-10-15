@@ -153,7 +153,6 @@ export async function createElAsync<K extends keyof HTMLElementTagNameMap>(
  * @returns A {@link Promise} that resolves to the DocumentFragment.
  */
 export async function createFragmentAsync(callback?: (element: DocumentFragment) => Promisable<void>): Promise<DocumentFragment> {
-  // eslint-disable-next-line obsidianmd/prefer-create-el -- Agnostic module.
   const fragment = document.createDocumentFragment();
   await callback?.(fragment);
   return fragment;
@@ -453,7 +452,6 @@ function applyDomElementInfo(element: HTMLElement, o: CreateHtmlElementInfo | st
 }
 
 function createHtmlElement<K extends keyof HTMLElementTagNameMap>(tag: K, o?: CreateHtmlElementInfo | string): HTMLElementTagNameMap[K] {
-  // eslint-disable-next-line obsidianmd/prefer-create-el -- Agnostic module.
   const element = document.createElement(tag);
   applyDomElementInfo(element, o);
   return element;
@@ -481,7 +479,6 @@ function getLoadableElements(element: Element): Element[] {
   return [...element.querySelectorAll('body, img, iframe, embed, link, object, script, style, track')];
 }
 
-// eslint-disable-next-line obsidianmd/no-global-this -- Type-only: the resolved window needs the global DOM constructor typings.
 function getNodeWindow(node: Node): typeof globalThis & Window {
   return node.ownerDocument?.defaultView ?? window;
 }
@@ -501,7 +498,6 @@ function insertIntoParent(element: Element, info: CreateHtmlElementInfo | Create
 function isInstanceOf<T extends Node>(node: Node, ctor: abstract new (...$arguments: never[]) => T): node is T {
   // Agnostic reimplementation of Obsidian's `Node.prototype.instanceOf` (enhance.js).
   // The caller resolves `ctor` in the node's own realm (via `getNodeWindow`), keeping it cross-window safe.
-  // eslint-disable-next-line obsidianmd/prefer-instanceof -- This IS the agnostic `.instanceOf` replacement.
   return node instanceof ctor;
 }
 

@@ -73,6 +73,5 @@ export function setAsyncOperationHook(hook: AsyncOperationHook | null): void {
 }
 
 function getSlot(): AsyncOperationHookSlot {
-  // eslint-disable-next-line obsidianmd/no-global-this -- The hook slot intentionally lives on the realm global, shared by every copy of this module.
   return globalThis as AsyncOperationHookSlot;
 }

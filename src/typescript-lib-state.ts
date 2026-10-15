@@ -84,6 +84,5 @@ function createSlot(): TypescriptLibStateSlot {
 }
 
 function getGlobal(): GlobalWithTypescriptLibState {
-  // eslint-disable-next-line obsidianmd/no-global-this -- The shared state intentionally lives on the realm global.
   return globalThis as GlobalWithTypescriptLibState;
 }

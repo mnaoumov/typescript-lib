@@ -59,7 +59,6 @@ describe('async operation hook', () => {
     setAsyncOperationHook(hook);
 
     expect(ASYNC_OPERATION_HOOK_KEY).toBe(Symbol.for('@mnaoumov/typescript-lib/async-operation-hook'));
-    // eslint-disable-next-line obsidianmd/no-global-this -- The hook slot intentionally lives on the realm global.
     expect(castTo<Record<symbol, unknown>>(globalThis)[ASYNC_OPERATION_HOOK_KEY]).toBe(hook);
   });
 

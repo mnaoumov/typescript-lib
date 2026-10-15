@@ -1,4 +1,3 @@
-/* eslint-disable obsidianmd/prefer-create-el -- This package is Obsidian-agnostic, so its tests build elements with the standard DOM. */
 // @vitest-environment jsdom
 
 import { strictProxy } from '@mnaoumov/typescript-test-toolkit/strict-proxy';
@@ -984,4 +983,3 @@ async function flushMutations(): Promise<void> {
     window.setTimeout(resolve, 0);
   });
 }
-/* eslint-enable obsidianmd/prefer-create-el -- This package is Obsidian-agnostic, so its tests build elements with the standard DOM. */
