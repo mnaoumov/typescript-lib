@@ -100,7 +100,7 @@ type LastInUnion<Union> = UnionToIntersection<Union extends unknown ? () => Unio
 type LiteralKey = number | string;
 
 // Splits an overloaded call signature into a union of its individual call signatures (a well-known overload-to-union trick).
-/* eslint-disable perfectionist/sort-intersection-types, perfectionist/sort-union-types, @stylistic/operator-linebreak -- The OverloadUnion recursion relies on this exact operand order; reordering breaks termination (TS2589), and the line-break shape is left to dprint. */
+/* eslint-disable perfectionist/sort-intersection-types, perfectionist/sort-union-types -- The OverloadUnion recursion relies on this exact operand order; reordering breaks termination (TS2589). */
 type OverloadUnion<TOverload extends GenericFunction> = Exclude<
   OverloadUnionRecursive<(() => never) & TOverload>,
   TOverload extends () => never ? never : () => never
@@ -111,7 +111,7 @@ type OverloadUnionRecursive<TOverload, TPartialOverload = unknown> = TOverload e
     | OverloadUnionRecursive<TPartialOverload & TOverload, TPartialOverload & ((...$arguments: Arguments) => Return) & Pick<TOverload, keyof TOverload>>
     | ((...$arguments: Arguments) => Return)
   : never;
-/* eslint-enable perfectionist/sort-intersection-types, perfectionist/sort-union-types, @stylistic/operator-linebreak -- The OverloadUnion recursion relies on this exact operand order; reordering breaks termination (TS2589), and the line-break shape is left to dprint. */
+/* eslint-enable perfectionist/sort-intersection-types, perfectionist/sort-union-types -- The OverloadUnion recursion relies on this exact operand order; reordering breaks termination (TS2589). */
 
 type ToString<T> = T extends number | string ? `${T}` : never;
 
