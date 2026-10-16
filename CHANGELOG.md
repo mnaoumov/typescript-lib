@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.1.1
+
+- docs: publish the documentation site at mnaoumov.dev/typescript-lib
+- build(deps): take @mnaoumov/typescript-dev-toolkit 2.0.0 and its rule namespace
+
 ## 1.1.0
 
 - feat(api-contract): add the api-contract subpath
