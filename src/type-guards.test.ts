@@ -12,10 +12,28 @@ import {
   assertNever,
   assertNonNullable,
   ensureGenericObject,
-  ensureNonNullable
+  ensureNonNullable,
+  isBoolean,
+  isNumber,
+  isString,
+  isStringArray,
+  isUndefined
 } from './type-guards.ts';
 
 describe('TypeGuards', () => {
+  describe('primitive guards', () => {
+    it.each([
+      { accepted: [true, false], guard: isBoolean, name: 'isBoolean', refused: [0, 'true', null, undefined] },
+      { accepted: [0, NaN, -1.5], guard: isNumber, name: 'isNumber', refused: ['1', null, undefined, 1n] },
+      { accepted: ['', 'a'], guard: isString, name: 'isString', refused: [1, null, undefined, ['a']] },
+      { accepted: [[], ['a', 'b']], guard: isStringArray, name: 'isStringArray', refused: ['a', ['a', 1], null, {}] },
+      { accepted: [undefined], guard: isUndefined, name: 'isUndefined', refused: [null, 0, ''] }
+    ])('$name should accept exactly its type', ({ accepted, guard, refused }) => {
+      expect(accepted.map((value) => guard(value))).toEqual(accepted.map(() => true));
+      expect(refused.map((value) => guard(value))).toEqual(refused.map(() => false));
+    });
+  });
+
   describe('assert', () => {
     it('should not throw when condition is true', () => {
       expect(() => {

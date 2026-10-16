@@ -111,3 +111,53 @@ export function ensureNonNullable<T extends NullableConstraint<T>>(value: T, err
   assertNonNullable(value, errorOrMessage);
   return value;
 }
+
+/**
+ * Checks whether a value is a boolean.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is a boolean.
+ */
+export function isBoolean(value: unknown): value is boolean {
+  return typeof value === 'boolean';
+}
+
+/**
+ * Checks whether a value is a number.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is a number.
+ */
+export function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
+/**
+ * Checks whether a value is a string.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is a string.
+ */
+export function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+/**
+ * Checks whether a value is an array of strings.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is an array whose every item is a string.
+ */
+export function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isString);
+}
+
+/**
+ * Checks whether a value is `undefined`.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is `undefined`.
+ */
+export function isUndefined(value: unknown): value is undefined {
+  return value === undefined;
+}
