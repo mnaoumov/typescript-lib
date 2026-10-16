@@ -11,6 +11,7 @@ import type {
   GenericFunction,
   GenericVoidFunction
 } from './function.ts';
+import type { ValueWrapper } from './value-wrapper.ts';
 
 import {
   abortSignalAny,
@@ -41,6 +42,7 @@ import {
   assert,
   assertNonNullable
 } from './type-guards.ts';
+import { getTypescriptLibState } from './typescript-lib-state.ts';
 
 /**
  * Parameters for {@link invokeAsyncSafelyAfterDelay}.
@@ -551,6 +553,18 @@ export function chain(chainPromise: null | Promise<void>, promisableFunction: ()
 }
 
 /**
+ * Gets whether a {@link runWithTimeout} call without its own `onTimeout` terminates the operation when it times out.
+ *
+ * The value is app-wide: it lives in the shared state, so every copy of this library loaded in one realm, such as
+ * the copy each Obsidian plugin bundles, reads the same value.
+ *
+ * @returns `true` (the default) if a timed-out operation is terminated, `false` if it is left running.
+ */
+export function isTerminationOnTimeoutEnabled(): boolean {
+  return getTerminationOnTimeoutEnabledWrapper().value;
+}
+
+/**
  * Marks an error to terminate retry logic.
  *
  * @param error - The error to mark to terminate retry logic.
@@ -716,7 +730,8 @@ export async function retryWithTimeout(params: RetryWithTimeoutParams): Promise<
 /**
  * Executes a function with a timeout. If the function does not complete within the specified time, it is considered to have timed out.
  *
- * If `DEBUG=obsidian-dev-utils:Async:runWithTimeout` is set, the execution is not terminated after the timeout and the function is allowed to run indefinitely.
+ * Without an `onTimeout`, a timed-out function is terminated, unless {@link setTerminationOnTimeoutEnabled} switched that off app-wide,
+ * in which case it is allowed to run indefinitely.
  *
  * @typeParam Result - The type of the result from the asynchronous function.
  * @param params - The parameters for the function.
@@ -823,6 +838,19 @@ export async function setImmediateAsync(): Promise<void> {
 }
 
 /**
+ * Sets whether a {@link runWithTimeout} call without its own `onTimeout` terminates the operation when it times out.
+ *
+ * Switch it off while debugging, so an operation paused on a breakpoint is not terminated under the debugger. The
+ * timeout is still logged through the `Async:runWithTimeout` debugger. The value is app-wide, see
+ * {@link isTerminationOnTimeoutEnabled}.
+ *
+ * @param isEnabled - `true` to terminate a timed-out operation, `false` to leave it running.
+ */
+export function setTerminationOnTimeoutEnabled(isEnabled: boolean): void {
+  getTerminationOnTimeoutEnabledWrapper().value = isEnabled;
+}
+
+/**
  * Delays execution for a specified number of milliseconds.
  *
  * @param delay - The time to wait in milliseconds.
@@ -888,5 +916,16 @@ export async function toArray<T>(iter: AsyncIterableIterator<T>): Promise<T[]> {
 }
 
 function defaultOnTimeout(context: TimeoutContext): void {
-  context.terminateOperation();
+  if (getTerminationOnTimeoutEnabledWrapper().value) {
+    context.terminateOperation();
+    return;
+  }
+
+  getLibDebugger('Async:runWithTimeout')(
+    `Timeout termination is switched off, so the operation '${context.operationName}' keeps running after ${String(context.duration)} milliseconds`
+  );
+}
+
+function getTerminationOnTimeoutEnabledWrapper(): ValueWrapper<boolean> {
+  return getTypescriptLibState('isTerminationOnTimeoutEnabled', true);
 }

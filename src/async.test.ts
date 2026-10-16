@@ -28,6 +28,7 @@ import {
   ignoreError,
   invokeAsyncSafely,
   invokeAsyncSafelyAfterDelay,
+  isTerminationOnTimeoutEnabled,
   marksAsTerminateRetry,
   neverEnds,
   nextTickAsync,
@@ -39,6 +40,7 @@ import {
   retryWithTimeout,
   runWithTimeout,
   setImmediateAsync,
+  setTerminationOnTimeoutEnabled,
   setTimeoutAsync,
   sleep,
   timeout,
@@ -59,6 +61,7 @@ import {
   assertNonNullable,
   ensureNonNullable
 } from './type-guards.ts';
+import { getTypescriptLibState } from './typescript-lib-state.ts';
 
 describe('Async', () => {
   describe('sleep', () => {
@@ -882,6 +885,46 @@ describe('Async', () => {
       });
 
       expect(result).toBe('finished');
+    });
+
+    describe('isTerminationOnTimeoutEnabled', () => {
+      afterEach(() => {
+        setTerminationOnTimeoutEnabled(true);
+      });
+
+      async function runSlowOperation(): Promise<string> {
+        return runWithTimeout({
+          async operationFunction() {
+            await new Promise((resolve) => {
+              window.setTimeout(resolve, 100);
+            });
+            return 'finished';
+          },
+          operationName: 'slowOperation',
+          timeoutInMilliseconds: 10
+        });
+      }
+
+      it('should be on by default', () => {
+        expect(isTerminationOnTimeoutEnabled()).toBe(true);
+      });
+
+      it('should terminate a timed-out operation without onTimeout when switched on', async () => {
+        setTerminationOnTimeoutEnabled(true);
+        await expect(runSlowOperation()).rejects.toThrow('Run with timeout failed');
+      });
+
+      it('should let a timed-out operation without onTimeout finish when switched off', async () => {
+        setTerminationOnTimeoutEnabled(false);
+        expect(isTerminationOnTimeoutEnabled()).toBe(false);
+        await expect(runSlowOperation()).resolves.toBe('finished');
+      });
+
+      it('should keep the switch in the app-wide shared state', () => {
+        // The shared state itself is proven to span loaded copies in `typescript-lib-state.test.ts`.
+        setTerminationOnTimeoutEnabled(false);
+        expect(getTypescriptLibState('isTerminationOnTimeoutEnabled', true).value).toBe(false);
+      });
     });
 
     it('should call onOperationCompleted callback when operation finishes after timeout', async () => {
