@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.0
+
+- feat(api-contract): add the api-contract subpath
+
 ## 1.0.1
 
 - build: keep pure subpaths free of node and DOM globals
