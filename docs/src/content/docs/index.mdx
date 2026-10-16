@@ -1,0 +1,38 @@
+---
+title: TypeScript Lib
+description: Generic TypeScript utilities, usable in any TypeScript project.
+template: splash
+editUrl: false
+lastUpdated: false
+hero:
+    title: TypeScript Lib
+    tagline: Async helpers, errors, disposables, strings, paths, debug logging, value transformers and DOM helpers, usable in any TypeScript project.
+    actions:
+        - text: Getting started
+          link: /typescript-lib/guides/getting-started/
+          icon: rocket
+        - text: API reference
+          link: /typescript-lib/api/
+          icon: open-book
+          variant: secondary
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+<CardGrid stagger>
+    <Card title="One module per subpath" icon="puzzle">
+        Every module is its own [subpath](./guides/getting-started/#importing), so a consumer loads only what it imports.
+    </Card>
+
+    <Card title="Runs anywhere" icon="laptop">
+        Node, a browser renderer and Obsidian, desktop and mobile. Platform-only modules say so in their name.
+    </Card>
+
+    <Card title="Debug logging" icon="magnifier">
+        [Namespaced debug messages](./guides/debugging/) you switch on from the console, with the caller's location attached.
+    </Card>
+
+    <Card title="API contracts" icon="approve-check">
+        Describe an API one module exposes to another, with a Standard Schema over every method's arguments and result.
+    </Card>
+</CardGrid>

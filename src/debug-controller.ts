@@ -14,7 +14,7 @@
  * - Namespaces prefixed with '-' are explicitly disabled
  * - Multiple namespaces can be combined with commas: `lorem,-lorem:ipsum,dolor:*`
  *
- * @see {@link https://mnaoumov.dev/obsidian-dev-utils/guides/debugging/}
+ * @see {@link https://mnaoumov.dev/typescript-lib/guides/debugging/}
  */
 
 /* v8 ignore start -- Interface-only module; no runtime code to test. */

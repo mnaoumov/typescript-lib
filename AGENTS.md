@@ -20,6 +20,7 @@ Every script is a thin entry point under `scripts/`, run with `jiti`, over the s
 - `npm test` / `npm run test:coverage` / `npm run test:watch` — the unit tests; `test:coverage` holds all four thresholds at 100%.
 - `npm run lint` / `npm run lint:fix` — ESLint. A warning fails it. ESLint is type-aware and reads the generated barrels, so build first on a fresh clone.
 - `npm run lint:md` / `npm run lint:md:fix`, `npm run format` / `npm run format:check`, `npm run spellcheck` — markdownlint (with the soft-break rule on: every paragraph is one physical line), dprint and cspell.
+- `npm run docs:build` / `npm run docs:dev` / `npm run docs:preview` — this package's documentation site, built with `@mnaoumov/typescript-dev-toolkit`'s docs-site builder (`scripts/docs-site-config.ts`, `astro.config.ts`, `docs/`): the API reference generated into `docs/src/content/docs/api`, the Open Graph cards, `astro build` into `docs/dist`, then a check of every link of the output, external ones included. `.github/workflows/build-pages.yml` builds and deploys it to `https://mnaoumov.dev/typescript-lib/` on every published release. This site is first in the deploy order of the five `@mnaoumov` sites, because it links to none of the others and they all link to it.
 - `npm run commit` — a guided Conventional-Commits message.
 - `npm run version '--' <type> [--no-changelog-editing]` — the release. Quote the `--` in PowerShell.
 
