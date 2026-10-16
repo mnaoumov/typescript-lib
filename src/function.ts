@@ -83,7 +83,7 @@ export function noop(): void {
 /**
  * A singleton no-op promise.
  */
-// eslint-disable-next-line obsidian-dev-utils/prefer-noop-async -- Avoid circular reference.
+// eslint-disable-next-line typescript-dev-toolkit/prefer-noop-async -- Avoid circular reference.
 export const noopAsyncSingletonPromise = Promise.resolve();
 
 /**
