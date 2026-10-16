@@ -103,6 +103,7 @@
     "version": "jiti scripts/version.ts"
   },
   "dependencies": {
+    "@standard-schema/spec": "^1.1.0",
     "@types/path-browserify": "^1.0.3",
     "debug": "^4.4.3",
     "path-browserify": "^1.0.1",
