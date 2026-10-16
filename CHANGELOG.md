@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.2.0
+
+- feat(async): add an app-wide switch for runWithTimeout's default termination
+- docs: link mnaoumov.dev/typescript-lib from the README
+
 ## 1.1.1
 
 - docs: publish the documentation site at mnaoumov.dev/typescript-lib
