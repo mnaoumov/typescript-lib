@@ -33,8 +33,23 @@ export type Literal = bigint | boolean | null | number | string | symbol | undef
 
 /**
  * Options for {@link objectTypeGuard}.
+ *
+ * @typeParam T - The object type the guard narrows to.
  */
-export interface ObjectTypeGuardOptions {
+export interface ObjectTypeGuardOptions<T extends object = object> {
+  /**
+   * Switches the guard to EXACT optional properties, reading only the value's OWN keys. Listing it is the switch,
+   * so pass `{}` for a type with no optional key.
+   *
+   * Every optional key of `T` must be listed, so an optional property later added to `T` fails to compile until it
+   * is. A listed key may then be absent, and its guard is not run; present, even as `undefined`, it must pass its
+   * guard. Any other key must be present. An inherited key counts as absent.
+   *
+   * Without it, a property is read with `Reflect.get`, so an inherited one counts and an absent one reads as
+   * `undefined`, which the guard of an optional property must then accept.
+   */
+  readonly exactOptionalKeys?: Readonly<Record<OptionalKeys<T>, true>>;
+
   /**
    * Whether a value carrying an own enumerable string key that no property guard names is refused.
    *
@@ -42,6 +57,13 @@ export interface ObjectTypeGuardOptions {
    */
   readonly shouldRejectUnknownKeys?: boolean;
 }
+
+/**
+ * The keys of an object type that are optional.
+ *
+ * @typeParam T - The object type.
+ */
+export type OptionalKeys<T extends object> = OptionalKeyMap<T>[keyof T];
 
 /**
  * One type guard per property of an object type, as {@link objectTypeGuard} takes them. Every key of `T` must be
@@ -63,6 +85,10 @@ export type PropertyTypeGuards<T extends object> = {
 export type TypeGuard<T> = (value: unknown) => value is T;
 
 type NullableConstraint<T> = null extends T ? unknown : undefined extends T ? unknown : never;
+
+type OptionalKeyMap<T extends object> = {
+  [TKey in keyof T]-?: Partial<Pick<T, TKey>> extends Pick<T, TKey> ? TKey : never;
+};
 
 /**
  * Builds a guard accepting an array whose every item the item guard accepts.
@@ -320,15 +346,17 @@ export function nullableTypeGuard<T>(isValue: TypeGuard<T>): TypeGuard<null | T>
 
 /**
  * Builds a guard accepting an object whose every listed property its guard accepts. A property is read with
- * `Reflect.get`, so an inherited one counts and an absent one reads as `undefined`.
+ * `Reflect.get`, so an inherited one counts and an absent one reads as `undefined`, unless
+ * {@link ObjectTypeGuardOptions.exactOptionalKeys} switches the guard to own keys and exact optional properties.
  *
  * @typeParam T - The object type.
  * @param propertyTypeGuards - One guard per property of `T`.
  * @param options - The options for the guard.
  * @returns The guard.
  */
-export function objectTypeGuard<T extends object>(propertyTypeGuards: PropertyTypeGuards<T>, options?: ObjectTypeGuardOptions): TypeGuard<T> {
+export function objectTypeGuard<T extends object>(propertyTypeGuards: PropertyTypeGuards<T>, options?: ObjectTypeGuardOptions<T>): TypeGuard<T> {
   const shouldRejectUnknownKeys = options?.shouldRejectUnknownKeys ?? false;
+  const exactOptionalKeys = options?.exactOptionalKeys;
   return (value): value is T => {
     if (!isObject(value)) {
       return false;
@@ -338,8 +366,17 @@ export function objectTypeGuard<T extends object>(propertyTypeGuards: PropertyTy
       return false;
     }
 
-    for (const key in propertyTypeGuards) {
-      if (!propertyTypeGuards[key](Reflect.get(value, key))) {
+    const typeGuards: Readonly<Record<string, TypeGuard<unknown>>> = propertyTypeGuards;
+    for (const [key, typeGuard] of Object.entries(typeGuards)) {
+      if (exactOptionalKeys && !Object.hasOwn(value, key)) {
+        if (Object.hasOwn(exactOptionalKeys, key)) {
+          continue;
+        }
+
+        return false;
+      }
+
+      if (!typeGuard(Reflect.get(value, key))) {
         return false;
       }
     }

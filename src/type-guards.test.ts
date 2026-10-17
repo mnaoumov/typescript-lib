@@ -7,6 +7,8 @@ import {
 
 import type {
   GuardedType,
+  ObjectTypeGuardOptions,
+  OptionalKeys,
   PropertyTypeGuards,
   TypeGuard
 } from './type-guards.ts';
@@ -158,6 +160,37 @@ describe('TypeGuards', () => {
 
     it('should refuse an absent optional property whose guard was not widened to undefined', () => {
       expect(objectTypeGuard<Shape>({ label: isString, size: isNumber })({ size: 1 })).toBe(false);
+    });
+
+    describe('with exactOptionalKeys', () => {
+      const isExactShape = objectTypeGuard<Shape>({ label: isString, size: isNumber }, { exactOptionalKeys: { label: true } });
+
+      it('should accept an absent optional key and refuse one present as undefined', () => {
+        expectGuard(isExactShape, [{ size: 1 }, { label: 'a', size: 1 }, { extra: true, size: 1 }], [{ label: undefined, size: 1 }, { label: 1, size: 1 }]);
+      });
+
+      it('should refuse an absent required key', () => {
+        expectGuard(isExactShape, [], [{ label: 'a' }, {}]);
+      });
+
+      it('should read only own keys', () => {
+        expect(isExactShape(Object.create({ size: 1 }))).toBe(false);
+        expect(isExactShape(Object.assign(Object.create({ label: 1 }), { size: 1 }))).toBe(true);
+      });
+
+      it('should still refuse unknown keys when asked', () => {
+        const strict = objectTypeGuard<Shape>({ label: isString, size: isNumber }, { exactOptionalKeys: { label: true }, shouldRejectUnknownKeys: true });
+        expectGuard(strict, [{ size: 1 }], [{ extra: true, size: 1 }]);
+      });
+
+      it('should require every optional key and only optional keys', () => {
+        // @ts-expect-error -- `label` is optional and missing.
+        const missing: ObjectTypeGuardOptions<Shape> = { exactOptionalKeys: {} };
+        // @ts-expect-error -- `size` is required.
+        const required: ObjectTypeGuardOptions<Shape> = { exactOptionalKeys: { label: true, size: true } };
+        expect([missing, required]).toHaveLength(2);
+        expectTypeOf<OptionalKeys<Shape>>().toEqualTypeOf<'label'>();
+      });
     });
   });
 
