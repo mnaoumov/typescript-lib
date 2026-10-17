@@ -1,8 +1,14 @@
 /**
  * @file
  *
- * Contains utility functions for type guards.
+ * Contains utility functions for type guards, and combinators that build a {@link TypeGuard} out of others.
+ *
+ * The combinators here work on bare type guards. Their `api-contract` counterparts (`arrayGuard`, `optionalGuard`,
+ * ...) work on an `ExpectedTypeGuard`, a type guard paired with the text an issue message reports, and their names
+ * drop the `Type` this layer's names carry.
  */
+
+import type { GenericFunction } from './function.ts';
 
 import { noop } from './function.ts';
 
@@ -13,7 +19,61 @@ import { noop } from './function.ts';
  */
 export type GenericObject<T = unknown> = Record<string | symbol, unknown> & T;
 
+/**
+ * The type a {@link TypeGuard} narrows to. Distributes over a union of guards.
+ *
+ * @typeParam TTypeGuard - The type guard.
+ */
+export type GuardedType<TTypeGuard> = TTypeGuard extends (value: unknown) => value is infer T ? T : never;
+
+/**
+ * A value {@link literalTypeGuard} can compare against.
+ */
+export type Literal = bigint | boolean | null | number | string | symbol | undefined;
+
+/**
+ * Options for {@link objectTypeGuard}.
+ */
+export interface ObjectTypeGuardOptions {
+  /**
+   * Whether a value carrying an own enumerable string key that no property guard names is refused.
+   *
+   * @default `false`
+   */
+  readonly shouldRejectUnknownKeys?: boolean;
+}
+
+/**
+ * One type guard per property of an object type, as {@link objectTypeGuard} takes them. Every key of `T` must be
+ * listed. The guard of an optional property is typed to narrow to `undefined` as well, but a guard that refuses
+ * `undefined` still compiles there, so widen it with {@link optionalTypeGuard}: an absent property reads as
+ * `undefined`, and a guard refusing it refuses the object.
+ *
+ * @typeParam T - The object type.
+ */
+export type PropertyTypeGuards<T extends object> = {
+  readonly [TKey in keyof T]-?: TypeGuard<Partial<Pick<T, TKey>> extends Pick<T, TKey> ? T[TKey] | undefined : T[TKey]>;
+};
+
+/**
+ * A function deciding whether a value is a `T`.
+ *
+ * @typeParam T - The type the guard narrows to.
+ */
+export type TypeGuard<T> = (value: unknown) => value is T;
+
 type NullableConstraint<T> = null extends T ? unknown : undefined extends T ? unknown : never;
+
+/**
+ * Builds a guard accepting an array whose every item the item guard accepts.
+ *
+ * @typeParam T - The type of an item.
+ * @param isItem - The guard for one item.
+ * @returns The guard.
+ */
+export function arrayTypeGuard<T>(isItem: TypeGuard<T>): TypeGuard<T[]> {
+  return (value): value is T[] => Array.isArray(value) && value.every((item) => isItem(item));
+}
 
 /**
  * Asserts that a condition is `true`. Throws if it is not.
@@ -113,6 +173,28 @@ export function ensureNonNullable<T extends NullableConstraint<T>>(value: T, err
 }
 
 /**
+ * Builds a guard accepting any function, narrowed to the signature `TFunction`. Only that the value is a function
+ * is checked: a signature cannot be checked at runtime, so the guard trusts it.
+ *
+ * @typeParam TFunction - The signature the guard narrows to.
+ * @returns The guard.
+ */
+export function functionTypeGuard<TFunction extends GenericFunction>(): TypeGuard<TFunction> {
+  return (value): value is TFunction => isFunction(value);
+}
+
+/**
+ * Builds a guard accepting an instance of a class, or of a class derived from it.
+ *
+ * @typeParam T - The type of an instance.
+ * @param constructor - The class.
+ * @returns The guard.
+ */
+export function instanceOfTypeGuard<T>(constructor: abstract new (...arguments_: never[]) => T): TypeGuard<T> {
+  return (value): value is T => value instanceof constructor;
+}
+
+/**
  * Checks whether a value is a boolean.
  *
  * @param value - The value to check.
@@ -123,6 +205,26 @@ export function isBoolean(value: unknown): value is boolean {
 }
 
 /**
+ * Checks whether a value is a function.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is a function.
+ */
+export function isFunction(value: unknown): value is GenericFunction {
+  return typeof value === 'function';
+}
+
+/**
+ * Checks whether a value is `null`.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is `null`.
+ */
+export function isNull(value: unknown): value is null {
+  return value === null;
+}
+
+/**
  * Checks whether a value is a number.
  *
  * @param value - The value to check.
@@ -130,6 +232,16 @@ export function isBoolean(value: unknown): value is boolean {
  */
 export function isNumber(value: unknown): value is number {
   return typeof value === 'number';
+}
+
+/**
+ * Checks whether a value is an object: not `null`, and not a primitive or a function.
+ *
+ * @param value - The value to check.
+ * @returns Whether the value is an object.
+ */
+export function isObject(value: unknown): value is object {
+  return typeof value === 'object' && value !== null;
 }
 
 /**
@@ -160,4 +272,107 @@ export function isStringArray(value: unknown): value is string[] {
  */
 export function isUndefined(value: unknown): value is undefined {
   return value === undefined;
+}
+
+/**
+ * Builds a guard accepting exactly the keys of a record. Typing the record over a union, as
+ * `literalTypeGuard<Mode>({ A: true, B: true })`, makes a member later added to the union fail to compile until
+ * it is listed.
+ *
+ * @typeParam T - The accepted strings.
+ * @param literals - A record whose keys are the accepted strings.
+ * @returns The guard.
+ */
+export function literalTypeGuard<T extends string>(literals: Readonly<Record<T, true>>): TypeGuard<T>;
+/**
+ * Builds a guard accepting exactly the listed values, compared as `Array.prototype.includes` compares them.
+ *
+ * @typeParam T - The accepted values.
+ * @param literals - The accepted values.
+ * @returns The guard.
+ */
+export function literalTypeGuard<T extends Literal>(literals: readonly T[]): TypeGuard<T>;
+/**
+ * Builds a guard accepting exactly the listed values.
+ *
+ * @param literals - The accepted values, as a list or as the keys of a record.
+ * @returns The guard.
+ */
+export function literalTypeGuard(literals: Readonly<Record<string, true>> | readonly Literal[]): TypeGuard<Literal> {
+  if (isReadonlyArray(literals)) {
+    const literalList: readonly unknown[] = literals;
+    return (value): value is Literal => literalList.includes(value);
+  }
+
+  return (value): value is Literal => isString(value) && Object.hasOwn(literals, value);
+}
+
+/**
+ * Widens a guard to also accept `null`.
+ *
+ * @typeParam T - The type the guard narrows to.
+ * @param isValue - The guard to widen.
+ * @returns A guard accepting what `isValue` accepts, or `null`.
+ */
+export function nullableTypeGuard<T>(isValue: TypeGuard<T>): TypeGuard<null | T> {
+  return unionTypeGuard(isNull, isValue);
+}
+
+/**
+ * Builds a guard accepting an object whose every listed property its guard accepts. A property is read with
+ * `Reflect.get`, so an inherited one counts and an absent one reads as `undefined`.
+ *
+ * @typeParam T - The object type.
+ * @param propertyTypeGuards - One guard per property of `T`.
+ * @param options - The options for the guard.
+ * @returns The guard.
+ */
+export function objectTypeGuard<T extends object>(propertyTypeGuards: PropertyTypeGuards<T>, options?: ObjectTypeGuardOptions): TypeGuard<T> {
+  const shouldRejectUnknownKeys = options?.shouldRejectUnknownKeys ?? false;
+  return (value): value is T => {
+    if (!isObject(value)) {
+      return false;
+    }
+
+    if (shouldRejectUnknownKeys && Object.keys(value).some((key) => !Object.hasOwn(propertyTypeGuards, key))) {
+      return false;
+    }
+
+    for (const key in propertyTypeGuards) {
+      if (!propertyTypeGuards[key](Reflect.get(value, key))) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+}
+
+/**
+ * Widens a guard to also accept `undefined`, which is what an optional property or parameter reads as when it is
+ * left out.
+ *
+ * @typeParam T - The type the guard narrows to.
+ * @param isValue - The guard to widen.
+ * @returns A guard accepting what `isValue` accepts, or `undefined`.
+ */
+export function optionalTypeGuard<T>(isValue: TypeGuard<T>): TypeGuard<T | undefined> {
+  return unionTypeGuard(isUndefined, isValue);
+}
+
+/**
+ * Builds a guard accepting what any of the given guards accepts.
+ *
+ * @typeParam TTypeGuards - The guards.
+ * @param typeGuards - The guards, tried in order.
+ * @returns The guard.
+ */
+export function unionTypeGuard<const TTypeGuards extends readonly TypeGuard<unknown>[]>(
+  ...typeGuards: TTypeGuards
+): TypeGuard<GuardedType<TTypeGuards[number]>> {
+  return (value): value is GuardedType<TTypeGuards[number]> => typeGuards.some((typeGuard) => typeGuard(value));
+}
+
+function isReadonlyArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value);
 }

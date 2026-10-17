@@ -15,23 +15,41 @@ import type {
 } from './api-contract.ts';
 
 import {
+  arrayGuard,
   BOOLEAN_GUARD,
+  createApiContractSchemaBuilders,
   createArgumentsSchema,
+  createExpectedTypeGuard,
   createTypeGuardSchema,
   defineApiContract,
+  instanceOfGuard,
+  literalGuard,
   nullableGuard,
   NUMBER_GUARD,
   optionalGuard,
   STRING_ARRAY_GUARD,
   STRING_GUARD,
-  UNDEFINED_GUARD
+  UNDEFINED_GUARD,
+  unionGuard
 } from './api-contract.ts';
 import { LIBRARY_NAME } from './library.ts';
+import {
+  isNull,
+  objectTypeGuard
+} from './type-guards.ts';
 
 interface CounterApi {
   count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
   readonly name: string;
   reset: () => void;
+}
+
+interface Point {
+  x: number;
+}
+
+class PointClass implements Point {
+  public x = 0;
 }
 
 const COUNTER_CONTRACT = defineApiContract<CounterApi>({
@@ -136,6 +154,75 @@ describe('guards', () => {
   it('should let a spread guard say what the value is', () => {
     const schema = createTypeGuardSchema({ ...STRING_GUARD, expected: 'a path' });
     expect(validate(schema, 1)).toEqual({ issues: [{ message: 'Expected a path.' }] });
+  });
+
+  it('should pair a type guard with what it expects', () => {
+    const isPoint = objectTypeGuard<Point>({ x: NUMBER_GUARD.typeGuard });
+    expect(createExpectedTypeGuard('a point', isPoint)).toEqual({ expected: 'a point', typeGuard: isPoint });
+  });
+
+  it('should build an array guard', () => {
+    const guard = arrayGuard(NUMBER_GUARD);
+    expect(guard.expected).toBe('an array whose every item is a number');
+    expect([[], [1], ['1'], 1].map((value) => guard.typeGuard(value))).toEqual([true, true, false, false]);
+    expectTypeOf(guard.typeGuard).guards.toEqualTypeOf<number[]>();
+  });
+
+  it('should build an instance guard named after the class', () => {
+    const guard = instanceOfGuard(PointClass);
+    expect(guard.expected).toBe('an instance of PointClass');
+    expect([new PointClass(), { x: 1 }].map((value) => guard.typeGuard(value))).toEqual([true, false]);
+    expectTypeOf(guard.typeGuard).guards.toEqualTypeOf<PointClass>();
+  });
+
+  it('should build a literal guard from a list', () => {
+    const guard = literalGuard(['a', 1, 2n, null, undefined, true]);
+    expect(guard.expected).toBe('one of \'a\', 1, 2n, null, undefined, true');
+    expect(['a', 2n, 'b', 3n].map((value) => guard.typeGuard(value))).toEqual([true, true, false, false]);
+  });
+
+  it('should build a literal guard from the keys of a record', () => {
+    const guard = literalGuard<'Delete' | 'Keep'>({ Delete: true, Keep: true });
+    expect(guard.expected).toBe('one of \'Delete\', \'Keep\'');
+    expect(['Keep', 'Move'].map((value) => guard.typeGuard(value))).toEqual([true, false]);
+    expectTypeOf(guard.typeGuard).guards.toEqualTypeOf<'Delete' | 'Keep'>();
+  });
+
+  it('should build a union guard', () => {
+    const guard = unionGuard(STRING_GUARD, createExpectedTypeGuard('null', isNull), NUMBER_GUARD);
+    expect(guard.expected).toBe('a string or null or a number');
+    expect(['a', null, 1, undefined].map((value) => guard.typeGuard(value))).toEqual([true, true, true, false]);
+    expectTypeOf(guard.typeGuard).guards.toEqualTypeOf<null | number | string>();
+  });
+});
+
+describe('createApiContractSchemaBuilders', () => {
+  const builders = createApiContractSchemaBuilders('my-plugin');
+
+  it('should bind the vendor of every schema it builds', () => {
+    expect(builders.createArgumentsSchema([STRING_GUARD])['~standard'].vendor).toBe('my-plugin');
+    expect(builders.createTypeGuardSchema(NUMBER_GUARD)['~standard'].vendor).toBe('my-plugin');
+  });
+
+  it('should validate as the unbound builders do', () => {
+    expect(validate(builders.createArgumentsSchema([STRING_GUARD]), [1])).toEqual({ issues: [{ message: 'Expected a string.', path: [0] }] });
+    expect(validate(builders.createTypeGuardSchema(NUMBER_GUARD), 1)).toEqual({ value: 1 });
+  });
+
+  it('should type a contract entry as the unbound builders do', () => {
+    const { createArgumentsSchema: createBoundArgumentsSchema, createTypeGuardSchema: createBoundTypeGuardSchema } = builders;
+    const contract = defineApiContract<CounterApi>({
+      count: {
+        input: createBoundArgumentsSchema([STRING_GUARD, optionalGuard(BOOLEAN_GUARD)]),
+        output: createBoundTypeGuardSchema(NUMBER_GUARD)
+      },
+      reset: {
+        input: createBoundArgumentsSchema([]),
+        output: createBoundTypeGuardSchema(UNDEFINED_GUARD)
+      }
+    });
+    expectTypeOf(contract).toEqualTypeOf<TypedApiContract<CounterApi>>();
+    expect(validate(contract.count.input, ['a', 1])).toEqual({ issues: [{ message: 'Expected a boolean or undefined.', path: [1] }] });
   });
 });
 

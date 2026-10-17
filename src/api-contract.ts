@@ -15,14 +15,24 @@
 
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
+import type {
+  GuardedType,
+  Literal,
+  TypeGuard
+} from './type-guards.ts';
+
 import { LIBRARY_NAME } from './library.ts';
 import { castTo } from './object-utils.ts';
 import {
+  arrayTypeGuard,
+  instanceOfTypeGuard,
   isBoolean,
   isNumber,
   isString,
   isStringArray,
-  isUndefined
+  isUndefined,
+  literalTypeGuard,
+  unionTypeGuard
 } from './type-guards.ts';
 
 /**
@@ -38,6 +48,32 @@ import {
  */
 export type ApiContract<TApi extends object = object> = object extends TApi ? Readonly<Record<string, ApiMethodContract>>
   : TypedApiContract<TApi>;
+
+/**
+ * The schema builders of this module with the Standard Schema `vendor` already bound, as
+ * {@link createApiContractSchemaBuilders} returns them.
+ */
+export interface ApiContractSchemaBuilders {
+  /**
+   * {@link createArgumentsSchema}, reporting the bound vendor.
+   *
+   * @typeParam TParameters - The method's parameters, inferred from the guards or from the contract entry.
+   * @param parameters - One guard per parameter, in order.
+   * @returns The schema.
+   */
+  readonly createArgumentsSchema: <const TParameters extends readonly unknown[]>(
+    parameters: ArgumentTypeGuards<TParameters>
+  ) => StandardSchemaV1<unknown, MutableTuple<TParameters>>;
+
+  /**
+   * {@link createTypeGuardSchema}, reporting the bound vendor.
+   *
+   * @typeParam T - The type the guard narrows to.
+   * @param guard - The guard and what it expects.
+   * @returns The schema.
+   */
+  readonly createTypeGuardSchema: <T>(guard: ExpectedTypeGuard<T>) => StandardSchemaV1<unknown, T>;
+}
 
 /**
  * The payload schemas for a single API method. Both halves are optional: a method may declare only its input,
@@ -164,6 +200,35 @@ export const STRING_ARRAY_GUARD: ExpectedTypeGuard<string[]> = { expected: 'an a
 export const UNDEFINED_GUARD: ExpectedTypeGuard<undefined> = { expected: 'undefined', typeGuard: isUndefined };
 
 /**
+ * Widens a guard to an array whose every item `itemGuard` accepts.
+ *
+ * @typeParam T - The type of an item.
+ * @param itemGuard - The guard for one item.
+ * @returns The guard.
+ */
+export function arrayGuard<T>(itemGuard: ExpectedTypeGuard<T>): ExpectedTypeGuard<T[]> {
+  return createExpectedTypeGuard(`an array whose every item is ${itemGuard.expected}`, arrayTypeGuard(itemGuard.typeGuard));
+}
+
+/**
+ * Binds the Standard Schema `vendor` once, so a contract does not pass it to every schema builder. Destructure the
+ * result under the builders' own names and the calls read exactly as the unbound ones do:
+ *
+ * ```ts
+ * const { createArgumentsSchema, createTypeGuardSchema } = createApiContractSchemaBuilders('my-plugin');
+ * ```
+ *
+ * @param vendor - The vendor every schema reports.
+ * @returns The bound builders.
+ */
+export function createApiContractSchemaBuilders(vendor: string): ApiContractSchemaBuilders {
+  return {
+    createArgumentsSchema: <const TParameters extends readonly unknown[]>(parameters: ArgumentTypeGuards<TParameters>) => createArgumentsSchema(parameters, { vendor }),
+    createTypeGuardSchema: <T>(guard: ExpectedTypeGuard<T>) => createTypeGuardSchema({ ...guard, vendor })
+  };
+}
+
+/**
  * Builds the input schema of a method contract: a schema over the method's ARGUMENT LIST, one type guard per
  * parameter. An argument that fails its guard is reported with its index as the issue path, and an argument list
  * longer than the parameter list is refused. A missing argument reaches its guard as `undefined`, so an optional
@@ -194,6 +259,18 @@ export function createArgumentsSchema<const TParameters extends readonly unknown
 }
 
 /**
+ * Pairs a type guard with what it expects.
+ *
+ * @typeParam T - The type the guard narrows to.
+ * @param expected - What the value should have been, phrased to follow "Expected", e.g. `'a string'`.
+ * @param typeGuard - The guard.
+ * @returns The guard.
+ */
+export function createExpectedTypeGuard<T>(expected: string, typeGuard: TypeGuard<T>): ExpectedTypeGuard<T> {
+  return { expected, typeGuard };
+}
+
+/**
  * Builds a schema over one value from a type guard: the output schema of a method contract, typically.
  *
  * @typeParam T - The type the guard narrows to.
@@ -217,6 +294,46 @@ export function createTypeGuardSchema<T>(params: CreateTypeGuardSchemaParams<T>)
  */
 export function defineApiContract<TApi extends object>(contract: TypedApiContract<NoInfer<TApi>>): TypedApiContract<TApi> {
   return contract;
+}
+
+/**
+ * Builds a guard accepting an instance of a class, or of a class derived from it, expecting `an instance of` the
+ * class's name.
+ *
+ * @typeParam T - The type of an instance.
+ * @param constructor - The class.
+ * @returns The guard.
+ */
+export function instanceOfGuard<T>(constructor: abstract new (...arguments_: never[]) => T): ExpectedTypeGuard<T> {
+  return createExpectedTypeGuard(`an instance of ${constructor.name}`, instanceOfTypeGuard(constructor));
+}
+
+/**
+ * Builds a guard accepting exactly the keys of a record, expecting `one of` them. Typing the record over a union
+ * makes a member later added to the union fail to compile until it is listed.
+ *
+ * @typeParam T - The accepted strings.
+ * @param literals - A record whose keys are the accepted strings.
+ * @returns The guard.
+ */
+export function literalGuard<T extends string>(literals: Readonly<Record<T, true>>): ExpectedTypeGuard<T>;
+/**
+ * Builds a guard accepting exactly the listed values, expecting `one of` them.
+ *
+ * @typeParam T - The accepted values.
+ * @param literals - The accepted values.
+ * @returns The guard.
+ */
+export function literalGuard<T extends Literal>(literals: readonly T[]): ExpectedTypeGuard<T>;
+/**
+ * Builds a guard accepting exactly the listed values.
+ *
+ * @param literals - The accepted values, as a list or as the keys of a record.
+ * @returns The guard.
+ */
+export function literalGuard(literals: Readonly<Record<string, true>> | readonly Literal[]): ExpectedTypeGuard<Literal> {
+  const literalList: readonly Literal[] = isReadonlyArray(literals) ? literals : Object.keys(literals);
+  return createExpectedTypeGuard(`one of ${literalList.map((literal) => formatLiteral(literal)).join(', ')}`, literalTypeGuard(literalList));
 }
 
 /**
@@ -247,6 +364,22 @@ export function optionalGuard<T>(guard: ExpectedTypeGuard<T>): ExpectedTypeGuard
   };
 }
 
+/**
+ * Builds a guard accepting what any of the given guards accepts, expecting their `expected` texts joined by `or`.
+ *
+ * @typeParam TGuards - The guards.
+ * @param guards - The guards, tried in order.
+ * @returns The guard.
+ */
+export function unionGuard<const TGuards extends readonly ExpectedTypeGuard<unknown>[]>(
+  ...guards: TGuards
+): ExpectedTypeGuard<GuardedType<TGuards[number]['typeGuard']>> {
+  return createExpectedTypeGuard(
+    guards.map((guard) => guard.expected).join(' or '),
+    unionTypeGuard(...guards.map((guard) => guard.typeGuard))
+  );
+}
+
 function createSchema<T>(validate: (value: unknown) => StandardSchemaV1.Result<T>, vendor: string | undefined): StandardSchemaV1<unknown, T> {
   return {
     '~standard': {
@@ -255,4 +388,16 @@ function createSchema<T>(validate: (value: unknown) => StandardSchemaV1.Result<T
       version: 1
     }
   };
+}
+
+function formatLiteral(literal: Literal): string {
+  if (isString(literal)) {
+    return `'${literal}'`;
+  }
+
+  return typeof literal === 'bigint' ? `${String(literal)}n` : String(literal);
+}
+
+function isReadonlyArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value);
 }
