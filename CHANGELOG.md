@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.0
+
+- feat(debug-switches): add a debug switch registry
+
 ## 1.3.0
 
 - feat(type-guards): add type-guard combinators and a vendor-bound schema builder
