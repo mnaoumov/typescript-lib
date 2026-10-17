@@ -48,7 +48,10 @@ export const COUNTER_API_CONTRACT = defineApiContract<CounterApi>({
 - `createArgumentsSchema(guards, { vendor })` validates an argument list: one guard per parameter, issues carrying the argument index, too many arguments refused.
 - `createTypeGuardSchema({ expected, typeGuard, vendor })` validates one value.
 - `BOOLEAN_GUARD`, `NUMBER_GUARD`, `STRING_GUARD`, `STRING_ARRAY_GUARD` and `UNDEFINED_GUARD` are ready-made guards, `optionalGuard` and `nullableGuard` widen one, and a spread renames what it expects.
-- The schema `vendor` defaults to `@mnaoumov/typescript-lib`.
+- `arrayGuard`, `literalGuard`, `unionGuard` and `instanceOfGuard` build a guard together with what it expects, and `createExpectedTypeGuard(expected, typeGuard)` pairs any other type guard with its text.
+- The schema `vendor` defaults to `@mnaoumov/typescript-lib`. `createApiContractSchemaBuilders(vendor)` binds it once: destructure `createArgumentsSchema` and `createTypeGuardSchema` from it, and no call passes the vendor again.
+
+The guards for an API's own shapes come from `@mnaoumov/typescript-lib/type-guards`, whose combinators work on bare type guards: `objectTypeGuard<T>({ ... })` takes one guard per property of `T` and none may be missing (`{ shouldRejectUnknownKeys: true }` refuses extra keys), and `arrayTypeGuard`, `literalTypeGuard`, `unionTypeGuard`, `optionalTypeGuard`, `nullableTypeGuard`, `instanceOfTypeGuard` and `functionTypeGuard` build the rest. A name ending in `TypeGuard` returns a bare type guard; the `api-contract` name without `Type` returns the same guard paired with its `expected` text.
 
 Running the schemas belongs to whoever owns the call path. `@mnaoumov/obsidian-lib`'s plugin API registry runs them while its debugger is on.
 
