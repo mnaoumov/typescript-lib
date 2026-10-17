@@ -9,6 +9,7 @@ It is the bottom of the `@mnaoumov` package graph: it depends on none of the oth
 - `src/` — the sources, one module per file, each a published subpath (`@mnaoumov/typescript-lib/<module>`). The `index.ts` barrels and the `.d.ts` files beside the sources are build outputs and gitignored.
 - A module that only works on one platform carries a `desktop-` / `mobile-` prefix (`desktop-zip-extractor.ts`), and the ESLint config lets exactly those import Node builtins. See the carried rule L5 below.
 - `unicorn/prefer-global-this` is off: the DOM helpers address `window` on purpose, and the rule's autofix chains with `unicorn/no-unnecessary-global-this` into a bare global read that throws exactly where the global is absent.
+- **A debug namespace controls logging only, never behavior.** Behavior that should change while debugging is a named debug switch in `debug-switches.ts` (`registerDebugSwitch`, ids namespaced like `typescript-lib:terminate-on-timeout`), which a settings UI lists generically with `getDebugSwitches()`. Never gate behavior on a debugger's `enabled`.
 - The shared state lives in a realm-global slot (`typescript-lib-state.ts`, `async-operation-hook.ts`), so two loaded copies of this package share it. Tests prove that with a second copy loaded through `vi.resetModules()`.
 
 ## Commands
