@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.3.0
+
+- feat(type-guards): add type-guard combinators and a vendor-bound schema builder
+- build: validate the published output's dependencies in the build
+- ci(docs-site): set the repository homepage from the docs site build
+- build(deps): take typescript-dev-toolkit 3.0.0
+- docs: show the package logo as the home page hero image
+
 ## 1.2.0
 
 - feat(async): add an app-wide switch for runWithTimeout's default termination
