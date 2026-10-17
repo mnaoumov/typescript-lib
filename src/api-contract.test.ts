@@ -11,6 +11,7 @@ import type {
   ApiContract,
   ApiMethodContract,
   ApiMethodName,
+  ExpectedTypeGuard,
   TypedApiContract
 } from './api-contract.ts';
 
@@ -26,7 +27,9 @@ import {
   literalGuard,
   nullableGuard,
   NUMBER_GUARD,
+  objectGuard,
   optionalGuard,
+  optionsGuard,
   STRING_ARRAY_GUARD,
   STRING_GUARD,
   UNDEFINED_GUARD,
@@ -42,6 +45,10 @@ interface CounterApi {
   count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
   readonly name: string;
   reset: () => void;
+}
+
+interface LabelledPoint extends Point {
+  label?: string;
 }
 
 interface Point {
@@ -280,5 +287,58 @@ describe('ApiContract', () => {
   it('should return the contract it is given', () => {
     const contract = { count: COUNTER_CONTRACT.count, reset: COUNTER_CONTRACT.reset };
     expect(defineApiContract<CounterApi>(contract)).toBe(contract);
+  });
+});
+
+describe('objectGuard', () => {
+  it('should check each property and list them in expected', () => {
+    const guard = objectGuard<LabelledPoint>({ label: optionalGuard(STRING_GUARD), x: NUMBER_GUARD });
+    expect(guard.expected).toBe('{ label: a string or undefined; x: a number }');
+    expect([guard.typeGuard({ x: 1 }), guard.typeGuard({ label: 'a', x: 1 }), guard.typeGuard({ label: 1, x: 1 })]).toEqual([true, true, false]);
+    expectTypeOf(guard).toEqualTypeOf<ExpectedTypeGuard<LabelledPoint>>();
+  });
+
+  it('should mark exact optional keys and pass the options through', () => {
+    const guard = objectGuard<LabelledPoint>({ label: STRING_GUARD, x: NUMBER_GUARD }, {
+      description: 'a labelled point',
+      exactOptionalKeys: { label: true },
+      shouldRejectUnknownKeys: true
+    });
+    expect(guard.expected).toBe('a labelled point: { label?: a string; x: a number }');
+    expect([guard.typeGuard({ x: 1 }), guard.typeGuard({ label: undefined, x: 1 }), guard.typeGuard({ extra: 1, x: 1 })]).toEqual([true, false, false]);
+  });
+
+  it('should describe an object with no properties', () => {
+    expect(objectGuard<object>({}).expected).toBe('{}');
+  });
+});
+
+describe('optionsGuard', () => {
+  interface Options {
+    readonly isHidden?: boolean;
+    readonly prefix?: string;
+  }
+
+  const guard = optionsGuard<Options>({ isHidden: BOOLEAN_GUARD, prefix: STRING_GUARD }, { description: 'the options' });
+
+  it('should accept every option absent, undefined or of its type', () => {
+    expect([{}, { isHidden: undefined }, { isHidden: true, prefix: 'a' }, { extra: 1 }].map((value) => guard.typeGuard(value))).toEqual([true, true, true, true]);
+    expect([{ isHidden: 'yes' }, { prefix: 1 }, null].map((value) => guard.typeGuard(value))).toEqual([false, false, false]);
+    expectTypeOf(guard).toEqualTypeOf<ExpectedTypeGuard<Options>>();
+  });
+
+  it('should list the options as optional in expected', () => {
+    expect(guard.expected).toBe('the options: { isHidden?: a boolean; prefix?: a string }');
+    expect(optionsGuard<Options>({ isHidden: BOOLEAN_GUARD, prefix: STRING_GUARD }).expected).toBe('{ isHidden?: a boolean; prefix?: a string }');
+  });
+
+  it('should refuse unknown keys when asked', () => {
+    expect(optionsGuard<Options>({ isHidden: BOOLEAN_GUARD, prefix: STRING_GUARD }, { shouldRejectUnknownKeys: true }).typeGuard({ extra: 1 })).toBe(false);
+  });
+
+  it('should refuse a type with a required property', () => {
+    // @ts-expect-error -- `x` is required, so it takes `never`.
+    const required = optionsGuard<Point>({ x: NUMBER_GUARD });
+    expect(required.typeGuard({})).toBe(true);
   });
 });

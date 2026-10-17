@@ -18,6 +18,8 @@ import type { StandardSchemaV1 } from '@standard-schema/spec';
 import type {
   GuardedType,
   Literal,
+  ObjectTypeGuardOptions,
+  PropertyTypeGuards,
   TypeGuard
 } from './type-guards.ts';
 
@@ -32,6 +34,8 @@ import {
   isStringArray,
   isUndefined,
   literalTypeGuard,
+  objectTypeGuard,
+  optionalTypeGuard,
   unionTypeGuard
 } from './type-guards.ts';
 
@@ -159,6 +163,57 @@ export interface ExpectedTypeGuard<T> {
    */
   readonly typeGuard: (value: unknown) => value is T;
 }
+
+/**
+ * Options for {@link objectGuard}.
+ *
+ * @typeParam T - The object type the guard narrows to.
+ */
+export interface ObjectGuardOptions<T extends object> extends ObjectTypeGuardOptions<T> {
+  /**
+   * What the object is, put before its properties in `expected`, e.g. `'the options of the link'`.
+   */
+  readonly description?: string;
+}
+
+/**
+ * One guard per option of an all-optional object type, as {@link optionsGuard} takes them: each describes a
+ * PRESENT option, so it does not accept `undefined`. A required property of `T` takes `never`, so a type that is
+ * not all-optional does not compile.
+ *
+ * @typeParam T - The object type.
+ */
+export type OptionGuards<T extends object> = {
+  readonly [TKey in keyof T]-?: Partial<Pick<T, TKey>> extends Pick<T, TKey> ? ExpectedTypeGuard<Exclude<T[TKey], undefined>> : never;
+};
+
+/**
+ * Options for {@link optionsGuard}.
+ */
+export interface OptionsGuardOptions {
+  /**
+   * What the options are, put before them in `expected`, e.g. `'select options'`.
+   */
+  readonly description?: string;
+
+  /**
+   * Whether a value carrying an own enumerable string key that no option guard names is refused. Letting it through,
+   * the default, lets a consumer compiled against a later version of the options pass one this version does not know.
+   *
+   * @default `false`
+   */
+  readonly shouldRejectUnknownKeys?: boolean;
+}
+
+/**
+ * One guard per property of an object type, as {@link objectGuard} takes them, typed as {@link PropertyTypeGuards}
+ * types the bare guards.
+ *
+ * @typeParam T - The object type.
+ */
+export type PropertyGuards<T extends object> = {
+  readonly [TKey in keyof T]-?: ExpectedTypeGuard<Partial<Pick<T, TKey>> extends Pick<T, TKey> ? T[TKey] | undefined : T[TKey]>;
+};
 
 /**
  * The {@link ApiContract} of a named API: one entry per function member, each typed against that member. Both
@@ -351,6 +406,27 @@ export function nullableGuard<T>(guard: ExpectedTypeGuard<T>): ExpectedTypeGuard
 }
 
 /**
+ * Builds a guard accepting an object whose every listed property its guard accepts, as {@link objectTypeGuard} does,
+ * expecting the properties and what each expects: `{ alias?: a string; path: a string }`, after the
+ * {@link ObjectGuardOptions.description} when one is given. A key is marked optional when it is listed in
+ * {@link ObjectTypeGuardOptions.exactOptionalKeys}; without that list, an optional property's guard says
+ * `or undefined` itself.
+ *
+ * @typeParam T - The object type.
+ * @param propertyGuards - One guard per property of `T`.
+ * @param options - The options for the guard.
+ * @returns The guard.
+ */
+export function objectGuard<T extends object>(propertyGuards: PropertyGuards<T>, options?: ObjectGuardOptions<T>): ExpectedTypeGuard<T> {
+  const guards = castTo<Readonly<Record<string, ExpectedTypeGuard<unknown>>>>(propertyGuards);
+  const exactOptionalKeys: object = options?.exactOptionalKeys ?? {};
+  return createExpectedTypeGuard(
+    describeObject(options?.description, guards, (key) => Object.hasOwn(exactOptionalKeys, key)),
+    objectTypeGuard<T>(castTo<PropertyTypeGuards<T>>(mapGuards(guards, (guard) => guard.typeGuard)), options)
+  );
+}
+
+/**
  * Widens a guard to also accept `undefined`, which is what an optional parameter receives when it is left out.
  *
  * @typeParam T - The type the guard narrows to.
@@ -362,6 +438,27 @@ export function optionalGuard<T>(guard: ExpectedTypeGuard<T>): ExpectedTypeGuard
     expected: `${guard.expected} or undefined`,
     typeGuard: (value: unknown): value is T | undefined => value === undefined || guard.typeGuard(value)
   };
+}
+
+/**
+ * Builds a guard accepting an options bag: an object whose every option may be absent, or `undefined`, and must
+ * otherwise pass its guard. A key no guard names is let through unless
+ * {@link OptionsGuardOptions.shouldRejectUnknownKeys} is set. It expects the options and what each expects:
+ * `{ prefix?: a string; isHidden?: a boolean }`, after the {@link OptionsGuardOptions.description} when one is given.
+ *
+ * @typeParam T - The options type, every property of which is optional.
+ * @param optionGuards - One guard per option of `T`, for a present value.
+ * @param options - The options for the guard.
+ * @returns The guard.
+ */
+export function optionsGuard<T extends object>(optionGuards: OptionGuards<T>, options?: OptionsGuardOptions): ExpectedTypeGuard<T> {
+  const guards = castTo<Readonly<Record<string, ExpectedTypeGuard<unknown>>>>(optionGuards);
+  return createExpectedTypeGuard(
+    describeObject(options?.description, guards, () => true),
+    objectTypeGuard<T>(castTo<PropertyTypeGuards<T>>(mapGuards(guards, (guard) => optionalTypeGuard(guard.typeGuard))), {
+      shouldRejectUnknownKeys: options?.shouldRejectUnknownKeys ?? false
+    })
+  );
 }
 
 /**
@@ -390,6 +487,18 @@ function createSchema<T>(validate: (value: unknown) => StandardSchemaV1.Result<T
   };
 }
 
+function describeObject(
+  description: string | undefined,
+  guards: Readonly<Record<string, ExpectedTypeGuard<unknown>>>,
+  isOptional: (key: string) => boolean
+): string {
+  const entries = Object.entries(guards);
+  const properties = entries.length === 0
+    ? '{}'
+    : `{ ${entries.map(([key, guard]) => `${key}${isOptional(key) ? '?' : ''}: ${guard.expected}`).join('; ')} }`;
+  return description === undefined ? properties : `${description}: ${properties}`;
+}
+
 function formatLiteral(literal: Literal): string {
   if (isString(literal)) {
     return `'${literal}'`;
@@ -400,4 +509,11 @@ function formatLiteral(literal: Literal): string {
 
 function isReadonlyArray(value: unknown): value is readonly unknown[] {
   return Array.isArray(value);
+}
+
+function mapGuards(
+  guards: Readonly<Record<string, ExpectedTypeGuard<unknown>>>,
+  toTypeGuard: (guard: ExpectedTypeGuard<unknown>) => TypeGuard<unknown>
+): Record<string, TypeGuard<unknown>> {
+  return Object.fromEntries(Object.entries(guards).map(([key, guard]) => [key, toTypeGuard(guard)]));
 }
