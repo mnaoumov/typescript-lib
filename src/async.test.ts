@@ -28,6 +28,7 @@ import {
   ignoreError,
   invokeAsyncSafely,
   invokeAsyncSafelyAfterDelay,
+  // eslint-disable-next-line import-x/no-deprecated -- Testing the deprecated wrappers.
   isTerminationOnTimeoutEnabled,
   marksAsTerminateRetry,
   neverEnds,
@@ -40,12 +41,17 @@ import {
   retryWithTimeout,
   runWithTimeout,
   setImmediateAsync,
+  // eslint-disable-next-line import-x/no-deprecated -- Testing the deprecated wrappers.
   setTerminationOnTimeoutEnabled,
   setTimeoutAsync,
   sleep,
   timeout,
   toArray
 } from './async.ts';
+import {
+  getDebugSwitch,
+  getTerminateOnTimeoutDebugSwitch
+} from './debug-switches.ts';
 import {
   registerAsyncErrorEventHandler,
   SilentError,
@@ -887,11 +893,7 @@ describe('Async', () => {
       expect(result).toBe('finished');
     });
 
-    describe('isTerminationOnTimeoutEnabled', () => {
-      afterEach(() => {
-        setTerminationOnTimeoutEnabled(true);
-      });
-
+    describe('terminate-on-timeout debug switch', () => {
       async function runSlowOperation(): Promise<string> {
         return runWithTimeout({
           async operationFunction() {
@@ -906,27 +908,38 @@ describe('Async', () => {
       }
 
       it('should be on by default', () => {
-        expect(isTerminationOnTimeoutEnabled()).toBe(true);
+        expect(getTerminateOnTimeoutDebugSwitch().isEnabled()).toBe(true);
+      });
+
+      it('should be listed among the debug switches', () => {
+        getTerminateOnTimeoutDebugSwitch();
+        expect(getDebugSwitch('typescript-lib:terminate-on-timeout')?.isEnabledByDefault).toBe(true);
       });
 
       it('should terminate a timed-out operation without onTimeout when switched on', async () => {
-        setTerminationOnTimeoutEnabled(true);
+        getTerminateOnTimeoutDebugSwitch().setEnabled(true);
         await expect(runSlowOperation()).rejects.toThrow('Run with timeout failed');
       });
 
       it('should let a timed-out operation without onTimeout finish when switched off', async () => {
-        setTerminationOnTimeoutEnabled(false);
-        expect(isTerminationOnTimeoutEnabled()).toBe(false);
+        getTerminateOnTimeoutDebugSwitch().setEnabled(false);
         await expect(runSlowOperation()).resolves.toBe('finished');
+      });
+
+      it('should keep the deprecated wrappers on the same switch', () => {
+        /* eslint-disable @typescript-eslint/no-deprecated, import-x/no-deprecated -- Testing the deprecated wrappers. */
+        setTerminationOnTimeoutEnabled(false);
+        expect(getTerminateOnTimeoutDebugSwitch().isEnabled()).toBe(false);
+        expect(isTerminationOnTimeoutEnabled()).toBe(false);
+        /* eslint-enable @typescript-eslint/no-deprecated, import-x/no-deprecated -- Testing the deprecated wrappers. */
       });
 
       it('should keep the switch in the app-wide shared state', () => {
         // The shared state itself is proven to span loaded copies in `typescript-lib-state.test.ts`.
-        setTerminationOnTimeoutEnabled(false);
+        getTerminateOnTimeoutDebugSwitch().setEnabled(false);
         expect(getTypescriptLibState('isTerminationOnTimeoutEnabled', true).value).toBe(false);
       });
     });
-
     it('should call onOperationCompleted callback when operation finishes after timeout', async () => {
       let wasCompletedCallbackCalled = false;
 
