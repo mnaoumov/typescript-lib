@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.0
+
+- feat: add an api-contract verifier, objectGuard/optionsGuard and exact-optional objectTypeGuard
+
 ## 1.4.0
 
 - feat(debug-switches): add a debug switch registry
