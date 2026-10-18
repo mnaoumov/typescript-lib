@@ -9,6 +9,8 @@ description: Write namespaced debug messages, and turn them on from the console 
 
 `getDebugger` returns a debugger for a namespace. Call it like a function:
 
+<!-- snippet-check: context declare const items: readonly unknown[]; -->
+
 ```typescript
 import { getDebugger } from '@mnaoumov/typescript-lib/debug';
 
