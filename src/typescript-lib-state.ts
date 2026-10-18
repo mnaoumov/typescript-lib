@@ -5,7 +5,7 @@
  *
  * The bag lives on `globalThis` under a `Symbol.for` key, so every copy of this module loaded in one realm shares
  * it, whichever version it is. It holds what must exist once per realm: the debuggers, the `debug` instance and the
- * shared abort controller. Obsidian-specific state stays in `obsidian-dev-utils-state.ts`.
+ * shared abort controller. Obsidian-specific state stays in `@mnaoumov/obsidian-lib`, under its legacy `__obsidianDevUtils` global.
  *
  * The slot is a cross-version wire format: its key and the {@link TypescriptLibStateSlot} shape only ever change
  * additively.

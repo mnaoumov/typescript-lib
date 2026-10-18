@@ -51,9 +51,9 @@ export interface DebugController {
    * @example
    * ```typescript
    * window.DEBUG.enable('foo-bar'); // show all debug messages from the `foo-bar` plugin
-   * window.DEBUG.enable('foo-bar:obsidian-dev-utils:*'); // show all debug messages from the `obsidian-dev-utils` library within the `foo-bar` plugin
+   * window.DEBUG.enable('foo-bar:obsidian-dev-utils:*'); // show all debug messages from `@mnaoumov/obsidian-lib` within the `foo-bar` plugin (it keeps its legacy `obsidian-dev-utils` namespace)
    * window.DEBUG.enable('foo-bar:*'); // show all debug messages from the `foo-bar` plugin and its submodules
-   * window.DEBUG.enable('*:obsidian-dev-utils:*'); // show all debug messages for the `obsidian-dev-utils` library within any plugin
+   * window.DEBUG.enable('*:obsidian-dev-utils:*'); // show all debug messages from `@mnaoumov/obsidian-lib` within any plugin
    * window.DEBUG.enable(['foo-bar', 'baz-qux']); // enable multiple namespaces
    * window.DEBUG.enable('foo-bar,baz-qux'); // enable multiple namespaces using comma-separated string
    * window.DEBUG.enable('*'); // show all debug messages

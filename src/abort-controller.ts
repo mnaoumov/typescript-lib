@@ -161,7 +161,9 @@ export function abortSignalTimeout(timeoutInMilliseconds: number): AbortSignal {
  * globalThis[Symbol.for('@mnaoumov/typescript-lib/state')].values.sharedAbortController.value.abort();
  * ```
  *
- * In an Obsidian plugin the same instance is also reachable as `__obsidianDevUtils.sharedAbortController.value`.
+ * From code, call {@link getSharedAbortController} (or {@link getSharedAbortSignal}) rather than reading the slot.
+ * `@mnaoumov/obsidian-lib` also mirrors the instance under the legacy `__obsidianDevUtils` global, but only so that
+ * plugins bundling an older `obsidian-dev-utils` copy share it; new code and new console recipes should not use it.
  *
  * @returns The shared {@link ResettableAbortController}.
  */
@@ -177,12 +179,11 @@ export function getSharedAbortController(): ResettableAbortController {
  *
  * @example
  * ```typescript
- * await loop({
- *   abortSignal: getSharedAbortSignal(),
- *   buildNoticeMessage: (file) => `Processing ${file.path}`,
- *   items: app.vault.getMarkdownFiles(),
- *   processItem: async (file) => { await processFile(file); }
- * });
+ * const abortSignal = getSharedAbortSignal();
+ * for (const url of urls) {
+ *   abortSignal.throwIfAborted();
+ *   await fetch(url, { signal: abortSignal });
+ * }
  * ```
  *
  * @returns The {@link AbortSignal} of the shared {@link ResettableAbortController}.
