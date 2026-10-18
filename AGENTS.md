@@ -121,7 +121,7 @@ export function myFunction(param: Type): ReturnType {
 ### L8. Re-export a type from an ESM-only package through its `import type`, never `export … from`
 
 - `build:validate-declarations` type-checks the emitted `dist/lib/cjs/**/*.d.cts` under CJS resolution. There, any reference to an **ESM-only** dependency (`type-fest`, and anything else without a CJS entry) fails with **TS1479** unless the module specifier carries `with { 'resolution-mode': 'import' }`.
-- TypeScript's declaration emit adds that attribute **only to import declarations**. It does NOT add it to a re-export, so `export type { PackageJson } from 'type-fest';` compiles fine in `src/` and then fails the `.d.cts` validation — a break invisible to `lint`, `test`, and `build:compile:typescript`.
+- TypeScript's declaration emit adds that attribute **only to import declarations**. It does NOT add it to a re-export, so `export type { PackageJson } from 'type-fest';` compiles fine in `src/` and then fails the `.d.cts` validation — a break invisible to `lint`, `test`, and `build:compile`.
 - Re-export the binding already imported at the top of the file instead (`import type { PackageJson } from 'type-fest';` … `export type { PackageJson };`). The resolution mode stays attached to the import, and both the `.d.cts` and `.d.mts` emit the bare `export type { … };`.
 - `unicorn/prefer-export-from` actively pushes back toward the broken form, so the re-export needs an `// eslint-disable-next-line unicorn/prefer-export-from -- …` naming this reason. See `mnaoumov/typescript-dev-toolkit:src/npm.ts` for the reference case.
 - (cannot be forced by ESLint — the opposing rule is the one ESLint has; `build:validate-declarations` is the check that catches it)
