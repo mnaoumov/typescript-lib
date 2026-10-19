@@ -282,6 +282,77 @@ describe('Debug', () => {
       const dbg = getLibDebugger('some-module');
       expect(dbg.namespace).toBe('typescript-lib:some-module');
     });
+
+    describe('with debug namespace aliases', () => {
+      beforeEach(() => {
+        Library.init({
+          debugNamespace: 'new-lib',
+          debugNamespaceAliases: ['old-lib', 'older-lib'],
+          debugPrefixNamespace: 'alias-plugin:',
+          shouldPrintStackTrace: false
+        });
+      });
+
+      function loggedMessages(): unknown[] {
+        // eslint-disable-next-line no-console -- Valid usage.
+        return vi.mocked(console.debug).mock.calls.map((callArguments): unknown => callArguments[0]);
+      }
+
+      it('should report the current namespace', () => {
+        expect(getLibDebugger('my-module').namespace).toBe('alias-plugin:new-lib:my-module');
+      });
+
+      it('should print once under the current namespace when every namespace is enabled', () => {
+        vi.spyOn(console, 'debug').mockImplementation(noop);
+        debug.enable('alias-plugin:*');
+        getLibDebugger('my-module')('both enabled');
+        expect(loggedMessages()).toEqual([expect.stringContaining('both enabled')]);
+        // eslint-disable-next-line no-console -- Valid usage.
+        expect(vi.mocked(console.debug)).toHaveBeenCalledTimes(1);
+      });
+
+      it('should print under an alias when only that alias is enabled', () => {
+        const aliasDebugger = getDebugger('alias-plugin:older-lib:my-module', 1);
+        const currentDebugger = getDebugger('alias-plugin:new-lib:my-module', 1);
+        const aliasLogSpy = vi.spyOn(aliasDebugger, 'log').mockImplementation(noop);
+        const currentLogSpy = vi.spyOn(currentDebugger, 'log').mockImplementation(noop);
+        debug.enable('alias-plugin:older-lib:*');
+        getLibDebugger('my-module')('alias only');
+        expect(aliasLogSpy).toHaveBeenCalledTimes(1);
+        expect(currentLogSpy).not.toHaveBeenCalled();
+      });
+
+      it('should print nothing when no namespace is enabled', () => {
+        vi.spyOn(console, 'debug').mockImplementation(noop);
+        getLibDebugger('my-module')('nothing enabled');
+        // eslint-disable-next-line no-console -- Valid usage.
+        expect(vi.mocked(console.debug)).not.toHaveBeenCalled();
+      });
+
+      it('should report enabled when only an alias is enabled', () => {
+        debug.enable('alias-plugin:old-lib:*');
+        expect(getLibDebugger('my-module').enabled).toBe(true);
+      });
+
+      it('should report disabled when no namespace is enabled', () => {
+        expect(getLibDebugger('my-module').enabled).toBe(false);
+      });
+
+      it('should open the logged stack trace on the caller frame', () => {
+        Library.resetToDefault();
+        Library.init({ debugNamespace: 'new-lib', debugNamespaceAliases: ['old-lib'], debugPrefixNamespace: '', shouldPrintStackTrace: true });
+        const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(noop);
+        debug.enable('old-lib:*');
+        const dbg = getLibDebugger('frame-module');
+        function aliasCallerMarker(): void {
+          dbg('caller frame message');
+        }
+        aliasCallerMarker();
+        const stackTraceError = consoleSpy.mock.calls.flat().find((argument) => argument instanceof Error);
+        assertNonNullable(stackTraceError);
+        expect(stackTraceError.stack?.split('\n', 2)[1]).toMatch(/^ {4}at aliasCallerMarker /);
+      });
+    });
   });
 
   describe('printWithStackTrace', () => {

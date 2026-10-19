@@ -23,6 +23,8 @@ The message is written with `console.debug`. When the host initialized the libra
 
 The library's own messages live under its debug namespace, `typescript-lib` by default, behind the host's `debugPrefixNamespace`. A host built on the library, such as an Obsidian plugin, passes its own prefix, so the library's messages inside plugin `my-plugin` are under `my-plugin:typescript-lib:*`.
 
+A host that publishes its own namespace passes it as `debugNamespace`. When it renames that namespace, it passes the earlier names as `debugNamespaceAliases`, so a filter its users wrote for an old name keeps showing the messages. Each message still prints once: under the current namespace when a filter enables it, otherwise under the first alias a filter enables.
+
 ## Showing debug messages
 
 Browser and Electron consoles hide `console.debug` output until you enable the **Verbose** level in the console's log-level filter. Do that first, or nothing below shows anything.

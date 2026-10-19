@@ -17,6 +17,10 @@ import {
 import { Library } from './library.ts';
 import { getTypescriptLibState } from './typescript-lib-state.ts';
 
+/**
+ * The aliasing debugger's own frame between the caller and the `debug` package: the `apply` trap of its proxy.
+ */
+const ALIAS_FRAMES_TO_SKIP = 1;
 const NAMESPACE_SEPARATOR = ',';
 const NEGATED_NAMESPACE_PREFIX = '-';
 
@@ -122,11 +126,38 @@ export function getDebugger(namespace: string, framesToSkip = 0): Debugger {
 /**
  * Returns a debugger instance for the library (under its debug namespace, see `Library.debugNamespace`).
  *
+ * When the host supplied `Library.debugNamespaceAliases`, a filter written for an alias still shows the messages.
+ * Each message prints ONCE: under the current namespace when a filter enables it, otherwise under the first alias a
+ * filter enables. Printing under every enabled one would double each message under the most common filter of all,
+ * `<prefix>*`, which enables them all.
+ *
  * @param namespace - The namespace for the debugger instance.
  * @returns A debugger instance for the library (under its debug namespace, see `Library.debugNamespace`).
  */
 export function getLibDebugger(namespace: string): Debugger {
-  return getDebugger(`${Library.debugPrefixNamespace}${Library.debugNamespace}:${namespace}`);
+  const aliases = Library.debugNamespaceAliases;
+  if (aliases.length === 0) {
+    return getDebugger(`${Library.debugPrefixNamespace}${Library.debugNamespace}:${namespace}`);
+  }
+
+  // Every debugger comes from the shared cache `getDebugger` keeps, so only the cheap proxy is new on each call, and a
+  // spy installed on one call's `log` is the one the next call reaches.
+  const currentDebugger = getDebugger(`${Library.debugPrefixNamespace}${Library.debugNamespace}:${namespace}`, ALIAS_FRAMES_TO_SKIP);
+  const aliasDebuggers = aliases.map((alias) => getDebugger(`${Library.debugPrefixNamespace}${alias}:${namespace}`, ALIAS_FRAMES_TO_SKIP));
+  const allDebuggers = [currentDebugger, ...aliasDebuggers];
+  return new Proxy(currentDebugger, {
+    apply(_target, _thisArgument, $arguments: Parameters<Debugger>): void {
+      allDebuggers.find((debuggerInstance) => debuggerInstance.enabled)?.(...$arguments);
+    },
+    get(target, property, receiver): unknown {
+      if (property === 'enabled') {
+        return allDebuggers.some((debuggerInstance) => debuggerInstance.enabled);
+      }
+
+      const value: unknown = Reflect.get(target, property, receiver);
+      return value;
+    }
+  });
 }
 
 /**
