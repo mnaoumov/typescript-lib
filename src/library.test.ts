@@ -13,6 +13,7 @@ describe('Library', () => {
   it('should default to empty/false before init', () => {
     expect(Library.debugGuideUrl).toBe('');
     expect(Library.debugNamespace).toBe(DEFAULT_DEBUG_NAMESPACE);
+    expect(Library.debugNamespaceAliases).toEqual([]);
     expect(Library.debugPrefixNamespace).toBe('');
     expect(Library.shouldPrintStackTrace).toBe(false);
   });
@@ -25,6 +26,11 @@ describe('Library', () => {
   it('should expose the injected debug namespace after init', () => {
     Library.init({ debugNamespace: 'my-host', debugPrefixNamespace: '', shouldPrintStackTrace: false });
     expect(Library.debugNamespace).toBe('my-host');
+  });
+
+  it('should expose the injected debug namespace aliases after init', () => {
+    Library.init({ debugNamespace: 'my-host', debugNamespaceAliases: ['my-old-host'], debugPrefixNamespace: '', shouldPrintStackTrace: false });
+    expect(Library.debugNamespaceAliases).toEqual(['my-old-host']);
   });
 
   it('should keep the default debug namespace when init supplies none', () => {

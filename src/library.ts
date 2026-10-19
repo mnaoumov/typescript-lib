@@ -34,6 +34,13 @@ export interface LibraryInitParams {
   readonly debugNamespace?: string;
 
   /**
+   * Earlier names of {@link debugNamespace}, so a filter written for one of them keeps showing the library's debug
+   * messages after the host renames its namespace. Each message still prints once: under {@link debugNamespace} when a
+   * filter enables it, otherwise under the first alias a filter enables. Defaults to none.
+   */
+  readonly debugNamespaceAliases?: readonly string[];
+
+  /**
    * The namespace prefix prepended to the library's debug namespaces (e.g. `${pluginId}:`).
    */
   readonly debugPrefixNamespace: string;
@@ -74,6 +81,16 @@ class LibraryContext {
    */
   public get debugNamespace(): string {
     return this.params.debugNamespace ?? DEFAULT_DEBUG_NAMESPACE;
+  }
+
+  /**
+   * The earlier names of {@link debugNamespace} a filter may still be written for. Empty until {@link init} is called
+   * with some.
+   *
+   * @returns The debug namespace aliases.
+   */
+  public get debugNamespaceAliases(): readonly string[] {
+    return this.params.debugNamespaceAliases ?? [];
   }
 
   /**
