@@ -202,11 +202,18 @@ export function emitAsyncErrorEvent(asyncError: unknown, shouldIgnore = false): 
  * Converts an error to a string representation, including nested causes and the aggregated errors of
  * an `AggregateError`, with indentation.
  *
+ * Never throws: if the error cannot be formatted (a throwing getter, a malformed nested error), it falls back to the
+ * error's own string and stack, so the error being reported is never hidden behind a failure to report it.
+ *
  * @param error - The error to convert to a string.
  * @returns The string representation of the error.
  */
 export function errorToString(error: unknown): string {
-  return getErrorLines(error).map((line) => line.text).join('\n');
+  try {
+    return getErrorLines(error).map((line) => line.text).join('\n');
+  } catch (formattingError) {
+    return getFallbackErrorString(error, formattingError);
+  }
 }
 
 /**
@@ -361,13 +368,29 @@ function getErrorLines(error: unknown): ErrorLine[] {
   if (error.cause !== undefined) {
     lines.push(...generateNestedErrorLines(error.cause, 'Caused by:'));
   }
-  if (error instanceof AggregateError) {
-    const aggregatedErrors: readonly unknown[] = error.errors;
+  // A subclass, a cross-realm instance or a re-wrapped one can pass `instanceof AggregateError` without an `errors` array.
+  const aggregatedErrors: unknown = error instanceof AggregateError ? error.errors : undefined;
+  if (Array.isArray(aggregatedErrors)) {
     for (const [index, aggregatedError] of aggregatedErrors.entries()) {
       lines.push(...generateNestedErrorLines(aggregatedError, `Aggregated error #${String(index + 1)}:`));
     }
   }
   return lines;
+}
+
+/**
+ * Builds the last-resort representation of an error that {@link errorToString} failed to format.
+ *
+ * @param error - The error that could not be formatted.
+ * @param formattingError - What the formatter threw.
+ * @returns The error's string, its stack when it has one, and a note naming the formatting failure.
+ */
+function getFallbackErrorString(error: unknown, formattingError: unknown): string {
+  const errorString = safeToString(() => String(error));
+  const stack = safeToString(() => error instanceof Error ? error.stack ?? '' : '');
+  const lines = stack.startsWith(errorString) ? [stack] : [errorString, stack];
+  lines.push(`(errorToString could not format this error: ${safeToString(() => String(formattingError))})`);
+  return lines.filter((line) => line !== '').join('\n');
 }
 
 function getOwnErrorLines(error: Error): ErrorLine[] {
@@ -408,6 +431,14 @@ function handleAsyncError(asyncError: unknown): void {
 function hasStackHeader(): boolean {
   const firstLine = new Error(STACK_HEADER_PROBE_MESSAGE).stack?.split('\n', 1)[0];
   return firstLine === `Error: ${STACK_HEADER_PROBE_MESSAGE}`;
+}
+
+function safeToString(toString: () => string): string {
+  try {
+    return toString();
+  } catch {
+    return '<unprintable>';
+  }
 }
 
 function toTitleLine(text: string): ErrorLine {

@@ -192,6 +192,70 @@ describe('errorToString', () => {
     const result = errorToString(error);
     expect(result).toContain('root cause');
   });
+
+  it('should format an AggregateError whose errors is undefined', () => {
+    const error = new AggregateError([], 'no errors array');
+    Object.defineProperty(error, 'errors', { value: undefined });
+    const result = errorToString(error);
+    expect(result).toMatch(/^AggregateError: no errors array\n/);
+    expect(result).not.toContain('errorToString could not format');
+  });
+
+  it('should format an AggregateError whose errors is undefined when it is a cause', () => {
+    const cause = new AggregateError([], 'inner aggregate');
+    Object.defineProperty(cause, 'errors', { value: undefined });
+    const result = errorToString(new Error('outer', { cause }));
+    expect(result).toContain('Caused by:');
+    expect(result).toContain('inner aggregate');
+    expect(result).not.toContain('errorToString could not format');
+  });
+
+  it('should fall back to the stack when formatting throws', () => {
+    const error = new Error('real failure');
+    Object.defineProperty(error, 'cause', {
+      get(): never {
+        throw new Error('cause getter failed');
+      }
+    });
+    const result = errorToString(error);
+    expect(result).toContain('real failure');
+    expect(result).toContain('errorToString could not format this error: Error: cause getter failed');
+  });
+
+  it('should keep both the string and the stack when the stack getter throws', () => {
+    const error = new Error('real failure');
+    Object.defineProperty(error, 'stack', {
+      get(): never {
+        throw new Error('stack getter failed');
+      }
+    });
+    const result = errorToString(error);
+    expect(result).toBe('Error: real failure\n<unprintable>\n(errorToString could not format this error: Error: stack getter failed)');
+  });
+
+  it('should fall back when nothing about the error can be printed', () => {
+    const error = new Error();
+    Object.defineProperties(error, {
+      message: {
+        get(): never {
+          throw new Error('message getter failed');
+        }
+      },
+      stack: { value: undefined }
+    });
+    const result = errorToString(error);
+    expect(result).toBe('<unprintable>\n(errorToString could not format this error: Error: message getter failed)');
+  });
+
+  it('should fall back for a non-Error value whose toString throws', () => {
+    const value = {
+      toString(): never {
+        throw new Error('toString failed');
+      }
+    };
+    const result = errorToString(value);
+    expect(result).toBe('<unprintable>\n(errorToString could not format this error: Error: toString failed)');
+  });
 });
 
 describe('getStackTrace', () => {
@@ -533,6 +597,21 @@ describe('printError', () => {
     assertNonNullable(firstCall);
     const output = firstCall[0] as string;
     expect(output).toContain('child failure');
+  });
+
+  it('should print the real error when the nested AggregateError has no errors array', () => {
+    const mockConsole = strictProxy<Console>({ error: vi.fn() });
+    const cause = new AggregateError([], 'already registered');
+    Object.defineProperty(cause, 'errors', { value: undefined });
+
+    expect(() => {
+      printError(new Error('onload failed', { cause }), mockConsole);
+    }).not.toThrow();
+
+    const firstCall = (mockConsole.error as ReturnType<typeof vi.fn>).mock.calls[0];
+    assertNonNullable(firstCall);
+    const output = firstCall[0] as string;
+    expect(output).toContain('already registered');
   });
 });
 
