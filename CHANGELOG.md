@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.6.1
+
+- fix(error): keep printError from hiding the error it prints
+
 ## 1.6.0
 
 - feat(debug): let Library.init take debug namespace aliases
