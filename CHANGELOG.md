@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.6.0
+
+- feat(debug): let Library.init take debug namespace aliases
+- chore(build): drop the duplicate build:compile:typescript script
+- build(docs): use typescript-dev-toolkit 3.7.0's shared guide-snippet and outdated-reference checks
+- docs: check guide snippets and retired obsidian-dev-utils references
+- build(deps): take typescript-dev-toolkit 3.6.2 for the logo-aware OG card cache
+- docs: replace the docs site logo and favicon with the approved mark
+
 ## 1.5.0
 
 - feat: add an api-contract verifier, objectGuard/optionsGuard and exact-optional objectTypeGuard
