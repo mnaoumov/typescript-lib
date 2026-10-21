@@ -874,37 +874,87 @@ describe('Async', () => {
       expect(capturedContext.operationName).toBe('myOperation');
     });
 
-    it('should return the result when onTimeout does not terminate', async () => {
-      const result = await runWithTimeout({
-        onTimeout(context) {
-          context.onOperationCompleted(() => {
-            // Do not terminate - let the operation finish on its own
-          });
-        },
-        async operationFunction() {
-          await new Promise((resolve) => {
-            window.setTimeout(resolve, 100);
-          });
-          return 'finished';
-        },
-        timeoutInMilliseconds: 10
+    // The cases below need the timeout to fire BEFORE the operation finishes, which real timers do not guarantee
+    // On a loaded machine: there `onTimeout` may never run. Fake timers fire strictly in due order.
+    describe('when the operation outlives the timeout', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
       });
 
-      expect(result).toBe('finished');
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('should return the result when onTimeout does not terminate', async () => {
+        const promise = runWithTimeout({
+          onTimeout(context) {
+            context.onOperationCompleted(() => {
+              // Do not terminate - let the operation finish on its own
+            });
+          },
+          async operationFunction() {
+            await new Promise((resolve) => {
+              globalThis.setTimeout(resolve, 100);
+            });
+            return 'finished';
+          },
+          timeoutInMilliseconds: 10
+        });
+        await vi.advanceTimersByTimeAsync(100);
+
+        await expect(promise).resolves.toBe('finished');
+      });
+
+      it('should call onOperationCompleted callback when operation finishes after timeout', async () => {
+        let wasCompletedCallbackCalled = false;
+
+        const promise = runWithTimeout({
+          onTimeout(context) {
+            context.onOperationCompleted(() => {
+              wasCompletedCallbackCalled = true;
+            });
+          },
+          async operationFunction() {
+            await new Promise((resolve) => {
+              globalThis.setTimeout(resolve, 100);
+            });
+            return 'finished';
+          },
+          timeoutInMilliseconds: 10
+        });
+        await vi.advanceTimersByTimeAsync(10);
+        expect(wasCompletedCallbackCalled).toBe(false);
+        await vi.advanceTimersByTimeAsync(90);
+        await promise;
+
+        expect(wasCompletedCallbackCalled).toBe(true);
+      });
     });
 
     describe('terminate-on-timeout debug switch', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
       async function runSlowOperation(): Promise<string> {
-        return runWithTimeout({
+        const promise = runWithTimeout({
           async operationFunction() {
             await new Promise((resolve) => {
-              window.setTimeout(resolve, 100);
+              globalThis.setTimeout(resolve, 100);
             });
             return 'finished';
           },
           operationName: 'slowOperation',
           timeoutInMilliseconds: 10
         });
+        // Mark a rejection handled before the timers run; the caller still awaits the original promise.
+        promise.catch(noop);
+        await vi.advanceTimersByTimeAsync(100);
+        return promise;
       }
 
       it('should be on by default', () => {
@@ -939,26 +989,6 @@ describe('Async', () => {
         getTerminateOnTimeoutDebugSwitch().setEnabled(false);
         expect(getTypescriptLibState('isTerminationOnTimeoutEnabled', true).value).toBe(false);
       });
-    });
-    it('should call onOperationCompleted callback when operation finishes after timeout', async () => {
-      let wasCompletedCallbackCalled = false;
-
-      await runWithTimeout({
-        onTimeout(context) {
-          context.onOperationCompleted(() => {
-            wasCompletedCallbackCalled = true;
-          });
-        },
-        async operationFunction() {
-          await new Promise((resolve) => {
-            window.setTimeout(resolve, 100);
-          });
-          return 'finished';
-        },
-        timeoutInMilliseconds: 10
-      });
-
-      expect(wasCompletedCallbackCalled).toBe(true);
     });
 
     it('should pass abortSignal to operationFunction', async () => {
