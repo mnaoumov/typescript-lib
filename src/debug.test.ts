@@ -273,9 +273,9 @@ describe('Debug', () => {
     });
 
     it('should use the debug namespace the host injected', () => {
-      Library.init({ debugNamespace: 'obsidian-dev-utils', debugPrefixNamespace: 'test-plugin:', shouldPrintStackTrace: false });
+      Library.init({ debugNamespace: 'obsidian-lib', debugPrefixNamespace: 'test-plugin:', shouldPrintStackTrace: false });
       const dbg = getLibDebugger('my-module');
-      expect(dbg.namespace).toBe('test-plugin:obsidian-dev-utils:my-module');
+      expect(dbg.namespace).toBe('test-plugin:obsidian-lib:my-module');
     });
 
     it('should not prepend a prefix when the prefix namespace is empty', () => {

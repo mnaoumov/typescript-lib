@@ -162,8 +162,6 @@ export function abortSignalTimeout(timeoutInMilliseconds: number): AbortSignal {
  * ```
  *
  * From code, call {@link getSharedAbortController} (or {@link getSharedAbortSignal}) rather than reading the slot.
- * `@mnaoumov/obsidian-lib` also mirrors the instance under the legacy `__obsidianDevUtils` global, but only so that
- * plugins bundling an older `obsidian-dev-utils` copy share it; new code and new console recipes should not use it.
  *
  * @returns The shared {@link ResettableAbortController}.
  */
