@@ -178,6 +178,21 @@ describe('resolve', () => {
   it('should treat a Windows drive path as absolute', () => {
     expect(resolve('/foo', String.raw`C:\a\b`, '..', 'c')).toBe('C:/a/c');
   });
+
+  it('should not read the working folder when a segment is absolute', () => {
+    vi.spyOn(process, 'cwd').mockImplementation(() => {
+      throw new Error('cwd should not be read');
+    });
+    try {
+      expect(resolve('/foo', 'bar')).toBe('/foo/bar');
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('should not treat a drive-like segment in the middle of a path as a drive', () => {
+    expect(resolve('/foo/c:/bar:baz')).toBe('/foo/c:/bar:baz');
+  });
 });
 
 describe('relative', () => {
@@ -190,7 +205,9 @@ describe('relative', () => {
     ['/foo/bar', '/foo/bar', ''],
     ['F:/foo/bar', 'F:/foo/baz', '../baz'],
     ['f:/foo/bar', 'F:/foo/baz', '../baz'],
-    ['F:/foo', 'G:/bar', 'G:/bar']
+    ['F:/foo', 'G:/bar', 'G:/bar'],
+    ['F:/foo', 'F:/bar', '../bar'],
+    ['/foo/c:/bar:baz', '/foo/qux', '../../qux']
   ])('should compute the relative path from %s to %s -> %j', (from: string, to: string, expected: string) => {
     expect(relative(from, to)).toBe(expected);
   });
