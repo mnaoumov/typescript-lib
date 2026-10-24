@@ -11,6 +11,7 @@ import {
   replaceAll
 } from './string.ts';
 
+const ROOTED_WINDOWS_DRIVE_ROOT_REG_EXP = /^\/[a-zA-Z]:$/;
 const WINDOWS_DRIVE_REG_EXP = /^[a-zA-Z]:\//;
 const WINDOWS_POSIX_LIKE_PATH_REG_EXP = /[a-zA-Z]:\/[^:]*$/;
 
@@ -199,6 +200,10 @@ export function resolve(...pathSegments: string[]): string {
     rootedSegments.unshift(toRootedPosixPath(process.cwd()));
   }
   const path = posix.resolve(...rootedSegments);
+  // `path-browserify` drops the trailing `/` of a root it did not know, so a drive root comes back as `/F:`.
+  if (ROOTED_WINDOWS_DRIVE_ROOT_REG_EXP.test(path)) {
+    return `${path.slice(1)}/`;
+  }
   const match = WINDOWS_POSIX_LIKE_PATH_REG_EXP.exec(path);
   return match?.[0] ?? path;
 }
