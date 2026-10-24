@@ -193,6 +193,23 @@ describe('resolve', () => {
   it('should not treat a drive-like segment in the middle of a path as a drive', () => {
     expect(resolve('/foo/c:/bar:baz')).toBe('/foo/c:/bar:baz');
   });
+
+  it.each([
+    [['F:/'], 'F:/'],
+    [['F:\\'], 'F:/'],
+    [['F:/a', '..'], 'F:/'],
+    [[String.raw`z:\a\b`, '..', '..'], 'z:/']
+  ])('should keep the drive root when resolving %j -> %s', (segments: string[], expected: string) => {
+    expect(resolve(...segments)).toBe(expected);
+  });
+
+  it.each([
+    ['/foo/c:'],
+    ['/c:bar'],
+    ['/1:']
+  ])('should not treat %s as a drive root', (path: string) => {
+    expect(resolve(path)).toBe(path);
+  });
 });
 
 describe('relative', () => {
@@ -207,7 +224,10 @@ describe('relative', () => {
     ['f:/foo/bar', 'F:/foo/baz', '../baz'],
     ['F:/foo', 'G:/bar', 'G:/bar'],
     ['F:/foo', 'F:/bar', '../bar'],
-    ['/foo/c:/bar:baz', '/foo/qux', '../../qux']
+    ['/foo/c:/bar:baz', '/foo/qux', '../../qux'],
+    ['F:/', 'F:/foo', 'foo'],
+    ['F:\\', 'F:/foo/bar', 'foo/bar'],
+    ['F:/foo', 'F:/', '..']
   ])('should compute the relative path from %s to %s -> %j', (from: string, to: string, expected: string) => {
     expect(relative(from, to)).toBe(expected);
   });
