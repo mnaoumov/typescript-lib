@@ -512,12 +512,20 @@ describe('Debug', () => {
       expect(allArguments).toContain('enabled');
     });
 
-    it('should restore original namespaces after showing the message', () => {
+    it('should produce no console.debug output when the plugin namespace is disabled', () => {
+      vi.spyOn(console, 'debug').mockImplementation(noop);
+      debug.enable('other-plugin');
+      showInitialDebugMessage('disabled-plugin');
+      // eslint-disable-next-line no-console -- Valid usage.
+      expect(vi.mocked(console.debug)).not.toHaveBeenCalled();
+    });
+
+    it('should leave the namespaces unchanged', () => {
       const controller = getDebugController();
       controller.set('original-ns');
       showInitialDebugMessage('temp-plugin');
-      const namespaces = controller.get();
-      expect(namespaces).toContain('original-ns');
+      showInitialDebugMessage('original-ns');
+      expect(controller.get()).toEqual(['original-ns']);
     });
 
     it('should point at the debug guide the host supplied', () => {
@@ -537,13 +545,6 @@ describe('Debug', () => {
       const allArguments = vi.mocked(console.debug).mock.calls.flat().join(' ');
       expect(allArguments).toContain('Debug messages for plugin no-guide-plugin are enabled.');
       expect(allArguments).not.toContain(' See ');
-    });
-
-    it('should restore empty namespaces after showing the message when none were set', () => {
-      const controller = getDebugController();
-      controller.set('');
-      showInitialDebugMessage('temp-plugin');
-      expect(controller.get()).toEqual([]);
     });
   });
 
