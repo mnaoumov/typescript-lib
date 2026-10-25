@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.6.2
+
+- fix(debug): print no initial debug message while the plugin's debug messages are disabled
+- fix(path): return the drive root from resolve instead of /F:
+- test(path): kill the surviving mutants in the Windows working-folder code
+- build: add the on-demand Stryker mutation run (test:mutation)
+- docs: point the debug console recipes and the state-slot doc at obsidian-lib
+- test(async): make the runWithTimeout timeout-ordering tests deterministic
+
 ## 1.6.1
 
 - fix(error): keep printError from hiding the error it prints
