@@ -200,21 +200,6 @@ export function printWithStackTrace(params: PrintWithStackTraceParams): void {
   debuggerInstance(message, ...$arguments, '\n\n---\nContext stack trace:\n', makeStackTraceError(stackTrace));
 }
 
-/**
- * Shows an initial debug message, telling the user how to disable the plugin's debug messages.
- *
- * Prints nothing while the plugin's debug messages are disabled, so a plugin in its default configuration writes nothing to the console.
- *
- * @param pluginId - The plugin ID.
- */
-export function showInitialDebugMessage(pluginId: string): void {
-  if (!isDebugNamespaceEnabled(pluginId)) {
-    return;
-  }
-
-  getDebugger(pluginId)(`Debug messages for plugin ${pluginId} are enabled.${formatDebugGuideReference(' how to disable them')}`);
-}
-
 function disableNamespaces(namespaces: string | string[]): void {
   const set = new Set(getNamespaces());
   for (const namespace of toArray(namespaces)) {
