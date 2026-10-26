@@ -1,6 +1,6 @@
 {
   "name": "@mnaoumov/typescript-lib",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "Generic TypeScript utilities: async helpers, errors, disposables, strings, paths, debug logging and more, usable in any TypeScript project.",
   "keywords": [
     "typescript",

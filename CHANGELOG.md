@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.7.0
+
+- feat(debug): export isDebugNamespaceEnabled and formatDebugGuideReference
+
 ## 1.6.2
 
 - fix(debug): print no initial debug message while the plugin's debug messages are disabled
