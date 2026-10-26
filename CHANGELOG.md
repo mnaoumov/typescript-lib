@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.0
+
+- feat(debug)!: remove showInitialDebugMessage
+
 ## 1.7.0
 
 - feat(debug): export isDebugNamespaceEnabled and formatDebugGuideReference
