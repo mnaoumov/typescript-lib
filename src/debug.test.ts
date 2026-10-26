@@ -17,8 +17,7 @@ import {
   getDebugger,
   getLibDebugger,
   isDebugNamespaceEnabled,
-  printWithStackTrace,
-  showInitialDebugMessage
+  printWithStackTrace
 } from './debug.ts';
 import { noop } from './function.ts';
 import { Library } from './library.ts';
@@ -508,75 +507,6 @@ describe('Debug', () => {
       debug.enable('wild-ns:*,-wild-ns:skipped');
       expect(isDebugNamespaceEnabled('other-ns')).toBe(false);
       expect(isDebugNamespaceEnabled('wild-ns:skipped')).toBe(false);
-    });
-  });
-
-  describe('showInitialDebugMessage', () => {
-    it('should not throw when called with a plugin ID', () => {
-      expect(() => {
-        showInitialDebugMessage('test-plugin-id');
-      }).not.toThrow();
-    });
-
-    it('should produce console.debug output when the plugin namespace is enabled', () => {
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('show-msg-plugin');
-      showInitialDebugMessage('show-msg-plugin');
-      // eslint-disable-next-line no-console -- Valid usage.
-      expect(vi.mocked(console.debug)).toHaveBeenCalled();
-    });
-
-    it('should include the plugin ID in the debug message', () => {
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('my-plugin-for-msg');
-      showInitialDebugMessage('my-plugin-for-msg');
-      // eslint-disable-next-line no-console -- Valid usage.
-      const allArguments = vi.mocked(console.debug).mock.calls.flat().join(' ');
-      expect(allArguments).toContain('my-plugin-for-msg');
-    });
-
-    it('should indicate enabled state when plugin namespace is enabled', () => {
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('enabled-plugin');
-      showInitialDebugMessage('enabled-plugin');
-      // eslint-disable-next-line no-console -- Valid usage.
-      const allArguments = vi.mocked(console.debug).mock.calls.flat().join(' ');
-      expect(allArguments).toContain('enabled');
-    });
-
-    it('should produce no console.debug output when the plugin namespace is disabled', () => {
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('other-plugin');
-      showInitialDebugMessage('disabled-plugin');
-      // eslint-disable-next-line no-console -- Valid usage.
-      expect(vi.mocked(console.debug)).not.toHaveBeenCalled();
-    });
-
-    it('should leave the namespaces unchanged', () => {
-      const controller = getDebugController();
-      controller.set('original-ns');
-      showInitialDebugMessage('temp-plugin');
-      showInitialDebugMessage('original-ns');
-      expect(controller.get()).toEqual(['original-ns']);
-    });
-
-    it('should point at the debug guide the host supplied', () => {
-      Library.init({ debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: false });
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('guide-plugin');
-      showInitialDebugMessage('guide-plugin');
-      // eslint-disable-next-line no-console -- Valid usage.
-      expect(vi.mocked(console.debug).mock.calls.flat().join(' ')).toContain('Debug messages for plugin guide-plugin are enabled. See https://example.com/guide how to disable them.');
-    });
-
-    it('should name no guide when the host supplied none', () => {
-      vi.spyOn(console, 'debug').mockImplementation(noop);
-      debug.enable('no-guide-plugin');
-      showInitialDebugMessage('no-guide-plugin');
-      // eslint-disable-next-line no-console -- Valid usage.
-      const allArguments = vi.mocked(console.debug).mock.calls.flat().join(' ');
-      expect(allArguments).toContain('Debug messages for plugin no-guide-plugin are enabled.');
-      expect(allArguments).not.toContain(' See ');
     });
   });
 
