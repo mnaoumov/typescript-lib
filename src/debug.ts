@@ -82,6 +82,16 @@ export function enableLibraryDebuggers(): void {
 }
 
 /**
+ * Formats the sentence that points at the debug guide the host supplied (see `Library.debugGuideUrl`).
+ *
+ * @param suffix - The text appended to the guide URL, inside the sentence (e.g. `' how to disable them'`).
+ * @returns The sentence, with a leading space, or an empty string when the host supplied no guide.
+ */
+export function formatDebugGuideReference(suffix = ''): string {
+  return Library.debugGuideUrl ? ` See ${Library.debugGuideUrl}${suffix}.` : '';
+}
+
+/**
  * Returns a debug controller.
  *
  * @returns A debug controller.
@@ -161,6 +171,16 @@ export function getLibDebugger(namespace: string): Debugger {
 }
 
 /**
+ * Checks whether the current debug filter enables a namespace.
+ *
+ * @param namespace - The namespace to check.
+ * @returns Whether the namespace is enabled.
+ */
+export function isDebugNamespaceEnabled(namespace: string): boolean {
+  return getSharedDebugLibInstance().enabled(namespace);
+}
+
+/**
  * Prints a message with a stack trace.
  *
  * @param params - The parameters for printing the message.
@@ -188,11 +208,11 @@ export function printWithStackTrace(params: PrintWithStackTraceParams): void {
  * @param pluginId - The plugin ID.
  */
 export function showInitialDebugMessage(pluginId: string): void {
-  if (!getSharedDebugLibInstance().enabled(pluginId)) {
+  if (!isDebugNamespaceEnabled(pluginId)) {
     return;
   }
 
-  getDebugger(pluginId)(`Debug messages for plugin ${pluginId} are enabled.${formatGuideReference(' how to disable them')}`);
+  getDebugger(pluginId)(`Debug messages for plugin ${pluginId} are enabled.${formatDebugGuideReference(' how to disable them')}`);
 }
 
 function disableNamespaces(namespaces: string | string[]): void {
@@ -220,10 +240,6 @@ function enableNamespaces(namespaces: string | string[]): void {
   setNamespaces([...set]);
 }
 
-function formatGuideReference(suffix: string): string {
-  return Library.debugGuideUrl ? ` See ${Library.debugGuideUrl}${suffix}.` : '';
-}
-
 function getNamespaces(): string[] {
   return toArray(getSharedDebugLibInstance().load() ?? '');
 }
@@ -239,7 +255,7 @@ function logWithCaller(params: LogWithCallerParams): void {
     message,
     namespace
   } = params;
-  if (!getSharedDebugLibInstance().enabled(namespace)) {
+  if (!isDebugNamespaceEnabled(namespace)) {
     return;
   }
 
@@ -268,7 +284,7 @@ function logWithCaller(params: LogWithCallerParams): void {
 function makeStackTraceError(stackTrace: string): CustomStackTraceError {
   return new CustomStackTraceError({
     cause: undefined,
-    message: `Debug mode: intentional placeholder error.${formatGuideReference('')}`,
+    message: `Debug mode: intentional placeholder error.${formatDebugGuideReference()}`,
     stackTrace
   });
 }

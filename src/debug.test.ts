@@ -12,9 +12,11 @@ import {
 
 import {
   enableLibraryDebuggers,
+  formatDebugGuideReference,
   getDebugController,
   getDebugger,
   getLibDebugger,
+  isDebugNamespaceEnabled,
   printWithStackTrace,
   showInitialDebugMessage
 } from './debug.ts';
@@ -476,6 +478,36 @@ describe('Debug', () => {
       const stackTraceError = consoleSpy.mock.calls.flat().find((argument) => argument instanceof Error);
       assertNonNullable(stackTraceError);
       expect(stackTraceError.message).toBe('Debug mode: intentional placeholder error.');
+    });
+  });
+
+  describe('formatDebugGuideReference', () => {
+    it('should point at the debug guide the host supplied, with the suffix inside the sentence', () => {
+      Library.init({ debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: false });
+      expect(formatDebugGuideReference(' how to disable them')).toBe(' See https://example.com/guide how to disable them.');
+    });
+
+    it('should default to no suffix', () => {
+      Library.init({ debugGuideUrl: 'https://example.com/guide', debugPrefixNamespace: '', shouldPrintStackTrace: false });
+      expect(formatDebugGuideReference()).toBe(' See https://example.com/guide.');
+    });
+
+    it('should return an empty string when the host supplied no guide', () => {
+      expect(formatDebugGuideReference(' how to disable them')).toBe('');
+    });
+  });
+
+  describe('isDebugNamespaceEnabled', () => {
+    it('should report a namespace the filter enables', () => {
+      debug.enable('enabled-ns,wild-ns:*');
+      expect(isDebugNamespaceEnabled('enabled-ns')).toBe(true);
+      expect(isDebugNamespaceEnabled('wild-ns:child')).toBe(true);
+    });
+
+    it('should report a namespace the filter does not enable, or negates', () => {
+      debug.enable('wild-ns:*,-wild-ns:skipped');
+      expect(isDebugNamespaceEnabled('other-ns')).toBe(false);
+      expect(isDebugNamespaceEnabled('wild-ns:skipped')).toBe(false);
     });
   });
 
