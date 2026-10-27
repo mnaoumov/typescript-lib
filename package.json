@@ -115,6 +115,9 @@
     "eslint-plugin-import": "npm:eslint-plugin-import-x@^4.17.1",
     "fflate": "$fflate",
     "js-yaml": "4.3.2",
+    "micromark-extension-math": {
+      "katex": "^0.18.2"
+    },
     "smol-toml": "^1.8.0",
     "typescript": "$typescript"
   },
@@ -128,6 +131,7 @@
   "devDependencies": {
     "@astrojs/markdown-satteri": "^0.4.4",
     "@astrojs/starlight": "^0.42.6",
+    "@babel/core": "^7.29.7",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@mnaoumov/typescript-dev-toolkit": "^5.0.0",
@@ -151,7 +155,7 @@
     "husky": "^9.1.7",
     "jiti": "^2.7.0",
     "jsdom": "^30.1.0",
-    "markdownlint-cli2": "^0.23.2",
+    "markdownlint-cli2": "^0.24.0",
     "nano-staged": "^1.0.2",
     "satori": "^0.33.5",
     "satteri": "^0.10.5",

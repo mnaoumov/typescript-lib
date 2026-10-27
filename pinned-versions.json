@@ -1,0 +1,28 @@
+{
+  "pins": {
+    "@babel/core": {
+      "section": "devDependencies",
+      "why": "Supply Babel 7 for svelte-preprocess's optional peer; Stryker installs Babel 8 separately.",
+      "check": "npm view svelte-preprocess@latest peerDependencies.@babel/core",
+      "expect": "^7.10.2"
+    },
+    "js-yaml": {
+      "section": "overrides",
+      "why": "Existing exact override inherited from the standalone repository's initial dependency tree.",
+      "check": null,
+      "manualCheck": "Reassess the inherited override against upstream dependency ranges and the branch gate before removing it. Its original compatibility rationale was not recorded."
+    },
+    "micromark-extension-math": {
+      "section": "overrides",
+      "why": "Its KaTeX 0.16 range excludes the 0.18.2 fix for https://github.com/advisories/GHSA-238p-pmpm-9mq7. Override only this parent's KaTeX dependency; inline and display math rendering are verified.",
+      "check": "npm view micromark-extension-math@latest dependencies.katex",
+      "expect": "^0.16.0"
+    },
+    "typescript": {
+      "section": "devDependencies",
+      "why": "Existing exact compiler version inherited from the standalone repository's initial dependency tree.",
+      "check": null,
+      "manualCheck": "Reassess the compiler pin with a full build and branch gate before upgrading. Its original compatibility rationale was not recorded."
+    }
+  }
+}
