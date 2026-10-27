@@ -28,14 +28,14 @@ export interface DebugSwitch extends DebugSwitchDefinition {
    *
    * @returns `true` if the switch is on.
    */
-  isEnabled: () => boolean;
+  readonly isEnabled: () => boolean;
 
   /**
    * Sets the value, notifying the {@link onDebugSwitchChanged} listeners if it changed.
    *
    * @param isEnabled - The new value.
    */
-  setEnabled: (isEnabled: boolean) => void;
+  readonly setEnabled: (isEnabled: boolean) => void;
 }
 
 /**

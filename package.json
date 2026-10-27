@@ -107,6 +107,17 @@
     "test:watch": "jiti scripts/test-watch.ts",
     "version": "jiti scripts/version.ts"
   },
+  "overrides": {
+    "@puppeteer/browsers": "^3.2.2",
+    "@vitest/coverage-v8": "$@vitest/coverage-v8",
+    "deepmerge-ts": "^8.0.2",
+    "eslint": "$eslint",
+    "eslint-plugin-import": "npm:eslint-plugin-import-x@^4.17.1",
+    "fflate": "$fflate",
+    "js-yaml": "4.3.2",
+    "smol-toml": "^1.8.0",
+    "typescript": "$typescript"
+  },
   "dependencies": {
     "@standard-schema/spec": "^1.1.0",
     "@types/path-browserify": "^1.0.3",
@@ -119,7 +130,7 @@
     "@astrojs/starlight": "^0.42.6",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@mnaoumov/typescript-dev-toolkit": "^3.11.0",
+    "@mnaoumov/typescript-dev-toolkit": "^4.0.0",
     "@mnaoumov/typescript-test-toolkit": "^1.0.0",
     "@resvg/resvg-js": "^2.6.2",
     "@stryker-mutator/core": "^10.1.1",
@@ -156,16 +167,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "overrides": {
-    "@puppeteer/browsers": "^3.2.2",
-    "@vitest/coverage-v8": "$@vitest/coverage-v8",
-    "deepmerge-ts": "^8.0.2",
-    "eslint": "$eslint",
-    "eslint-plugin-import": "npm:eslint-plugin-import-x@^4.17.1",
-    "fflate": "$fflate",
-    "js-yaml": "4.3.2",
-    "smol-toml": "^1.8.0",
-    "typescript": "$typescript"
   }
 }

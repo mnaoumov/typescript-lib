@@ -17,7 +17,7 @@ import { abortSignalNever } from './abort-controller.ts';
 export type ValueProvider<Value, Arguments extends object = object> = (($arguments: Arguments & CommonArguments) => Promisable<Value>) | Value;
 
 interface CommonArguments {
-  abortSignal: AbortSignal;
+  readonly abortSignal: AbortSignal;
 }
 
 /**

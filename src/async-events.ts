@@ -28,22 +28,22 @@ export interface AsyncEventRef {
   /**
    * An event source.
    */
-  asyncEventSource: GenericAsyncEventSource;
+  readonly asyncEventSource: GenericAsyncEventSource;
 
   /**
    * A callback to call when the event is triggered.
    */
-  callback: GenericCallback;
+  readonly callback: GenericCallback;
 
   /**
    * A name of the event.
    */
-  name: string;
+  readonly name: string;
 
   /**
    * A context passed as `this` to the `callback`.
    */
-  thisArgument: unknown;
+  readonly thisArgument: unknown;
 }
 
 /**
@@ -91,7 +91,7 @@ export interface AsyncEventSource<EventMap extends EventMapConstraint<EventMap> 
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
-  off: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
+  readonly off: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
     name: EventName,
     callback: (...$arguments: Arguments) => Promisable<void>
   ) => void;
@@ -117,7 +117,7 @@ export interface AsyncEventSource<EventMap extends EventMapConstraint<EventMap> 
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
-  on: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
+  readonly on: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
     name: EventName,
     callback: (...$arguments: Arguments) => Promisable<void>,
     thisArgument?: unknown
@@ -143,7 +143,7 @@ export interface AsyncEventSource<EventMap extends EventMapConstraint<EventMap> 
    * ```
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
-  once: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
+  readonly once: <EventName extends StringKeys<EventMap>, Arguments extends CallbackArguments<EventMap, EventName>>(
     name: EventName,
     callback: (...$arguments: Arguments) => Promisable<void>,
     thisArgument?: unknown
@@ -166,7 +166,7 @@ export interface AsyncEventTrigger<EventMap extends EventMapConstraint<EventMap>
    * @param name - The name of the event.
    * @param $arguments - The data to pass to the event listeners.
    */
-  trigger: <EventName extends StringKeys<EventMap>>(name: EventName, ...$arguments: CallbackArguments<EventMap, EventName>) => void;
+  readonly trigger: <EventName extends StringKeys<EventMap>>(name: EventName, ...$arguments: CallbackArguments<EventMap, EventName>) => void;
 
   /**
    * Trigger an event asynchronously.
@@ -176,7 +176,7 @@ export interface AsyncEventTrigger<EventMap extends EventMapConstraint<EventMap>
    * @param $arguments - The data to pass to the event listeners.
    * @returns A {@link Promise} that resolves when all listeners have completed.
    */
-  triggerAsync: <EventName extends StringKeys<EventMap>>(name: EventName, ...$arguments: CallbackArguments<EventMap, EventName>) => Promise<void>;
+  readonly triggerAsync: <EventName extends StringKeys<EventMap>>(name: EventName, ...$arguments: CallbackArguments<EventMap, EventName>) => Promise<void>;
 
   /**
    * Try to trigger an event, executing all the listeners in order even if some of them throw an error.
@@ -186,7 +186,7 @@ export interface AsyncEventTrigger<EventMap extends EventMapConstraint<EventMap>
    * @param $arguments - The data to pass to the event listeners.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
-  tryTrigger: <Arguments extends unknown[]>(eventRef: AsyncEventRef, $arguments: Arguments) => void;
+  readonly tryTrigger: <Arguments extends unknown[]>(eventRef: AsyncEventRef, $arguments: Arguments) => void;
 
   /**
    * Try to trigger an event asynchronously.
@@ -197,7 +197,7 @@ export interface AsyncEventTrigger<EventMap extends EventMapConstraint<EventMap>
    * @returns A {@link Promise} that resolves when all listeners have completed.
    */
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- We need to use the dummy parameter to get type inference.
-  tryTriggerAsync: <Arguments extends unknown[]>(eventRef: AsyncEventRef, $arguments: Arguments) => Promise<void>;
+  readonly tryTriggerAsync: <Arguments extends unknown[]>(eventRef: AsyncEventRef, $arguments: Arguments) => Promise<void>;
 }
 
 /**
@@ -229,7 +229,7 @@ export interface GenericAsyncEventSource {
    *
    * @param eventRef - The reference to remove.
    */
-  offref: (eventRef: AsyncEventRef) => void;
+  readonly offref: (eventRef: AsyncEventRef) => void;
 }
 
 /**

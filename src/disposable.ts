@@ -92,7 +92,7 @@ export interface AsyncDisposableEx extends AsyncDisposable {
    *
    * @returns A {@link Promise} that resolves once disposal completes.
    */
-  asyncDispose: () => Promise<void>;
+  readonly asyncDispose: () => Promise<void>;
 }
 
 /**
@@ -187,7 +187,7 @@ export interface DisposableEx extends Disposable {
   /**
    * Disposes the object. Delegates to `this[Symbol.dispose]()`.
    */
-  dispose: () => void;
+  readonly dispose: () => void;
 }
 
 /**

@@ -16,7 +16,7 @@ import type {
 import { TypeAsserter } from './type.ts';
 
 interface TestEvents {
-  on: ((name: 'bar', callback: (isEnabled: boolean) => void) => void) & ((name: 'foo', callback: (a: string, b: number) => void) => void) & ((name: string, callback: (...data: unknown[]) => unknown) => void);
+  readonly on: ((name: 'bar', callback: (isEnabled: boolean) => void) => void) & ((name: 'foo', callback: (a: string, b: number) => void) => void) & ((name: string, callback: (...data: unknown[]) => unknown) => void);
 }
 
 describe('ExtractEventMap', () => {
@@ -31,8 +31,8 @@ describe('ExtractEventMap', () => {
 describe('StringKeys', () => {
   it('should extract string keys from an object type', () => {
     interface TestType {
-      a: number;
-      b: string;
+      readonly a: number;
+      readonly b: string;
     }
     expectTypeOf<StringKeys<TestType>>().toEqualTypeOf<'a' | 'b'>();
   });
@@ -41,8 +41,8 @@ describe('StringKeys', () => {
 describe('PropertyValues', () => {
   it('should extract value types from an object type', () => {
     interface TestType {
-      a: number;
-      b: string;
+      readonly a: number;
+      readonly b: string;
     }
     expectTypeOf<PropertyValues<TestType>>().toEqualTypeOf<number | string>();
   });
@@ -72,17 +72,17 @@ describe('ExactMembers', () => {
 describe('ExactKeys', () => {
   it('should accept exact keys', () => {
     interface TestType {
-      x: number;
-      y: string;
+      readonly x: number;
+      readonly y: string;
     }
     expectTypeOf<ExactKeys<TestType, readonly ['x', 'y']>>().toEqualTypeOf<readonly ['x', 'y']>();
   });
 
   it('should produce error string for missing keys', () => {
     interface TestType {
-      a: number;
-      b: string;
-      c: boolean;
+      readonly a: number;
+      readonly b: string;
+      readonly c: boolean;
     }
     type Result = ExactKeys<TestType, readonly ['a', 'b']>;
     expectTypeOf<Result>().toBeString();
@@ -92,9 +92,9 @@ describe('ExactKeys', () => {
 describe('new TypeAsserter().assertAllKeys', () => {
   it('should return frozen array of keys for a matching type', () => {
     interface TestType {
-      a: number;
-      b: string;
-      c: boolean;
+      readonly a: number;
+      readonly b: string;
+      readonly c: boolean;
     }
     const keys = new TypeAsserter<TestType>().assertAllKeys(['a', 'b', 'c']);
     expect(keys).toEqual(['a', 'b', 'c']);
@@ -102,8 +102,8 @@ describe('new TypeAsserter().assertAllKeys', () => {
 
   it('should return a frozen array', () => {
     interface TestType {
-      x: number;
-      y: string;
+      readonly x: number;
+      readonly y: string;
     }
     const keys = new TypeAsserter<TestType>().assertAllKeys(['x', 'y']);
     expect(Object.isFrozen(keys)).toBe(true);
@@ -111,9 +111,9 @@ describe('new TypeAsserter().assertAllKeys', () => {
 
   it('should accept keys in any order', () => {
     interface TestType {
-      a: number;
-      b: string;
-      c: boolean;
+      readonly a: number;
+      readonly b: string;
+      readonly c: boolean;
     }
     const keys = new TypeAsserter<TestType>().assertAllKeys(['c', 'a', 'b']);
     expect(keys).toEqual(['c', 'a', 'b']);
@@ -121,7 +121,7 @@ describe('new TypeAsserter().assertAllKeys', () => {
 
   it('should return a copy, not the original array', () => {
     interface TestType {
-      a: number;
+      readonly a: number;
     }
     const original = ['a'] as const;
     const keys = new TypeAsserter<TestType>().assertAllKeys(original);
@@ -164,7 +164,7 @@ describe('new TypeAsserter().assertAllMembers', () => {
 describe('TypeAsserter method availability', () => {
   it('exposes assertAllKeys but disables assertAllMembers for an object type', () => {
     interface ObjectShape {
-      a: 1;
+      readonly a: 1;
     }
     expectTypeOf<TypeAsserter<ObjectShape>['assertAllKeys']>().not.toBeNever();
     expectTypeOf<TypeAsserter<ObjectShape>['assertAllMembers']>().toBeNever();

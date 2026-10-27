@@ -12,7 +12,7 @@ import {
 import { ensureNonNullable } from './type-guards.ts';
 
 interface ErrorAsyncEventMap {
-  asyncError: [error: unknown];
+  readonly asyncError: [error: unknown];
 }
 
 const errorAsyncEvents = new AsyncEvents<ErrorAsyncEventMap>();
@@ -25,6 +25,7 @@ interface ModuleState {
    * async error emitted (or a fire-and-forget operation whose rejection was captured) within the scope is
    * treated as expected and not collected as unhandled.
    */
+  // eslint-disable-next-line typescript-dev-toolkit/readonly-interface-members -- Entering and leaving ignore scopes updates the shared nesting depth.
   asyncErrorIgnoreContextDepth: number;
 
   /**
@@ -34,6 +35,7 @@ interface ModuleState {
    * {@link stopCollectingUnhandledAsyncErrors} — used by the test harness to fail a test that swallowed
    * an async error.
    */
+  // eslint-disable-next-line typescript-dev-toolkit/readonly-interface-members -- Opening and closing collection windows replaces the shared buffer.
   collectedUnhandledAsyncErrors: null | unknown[];
 }
 

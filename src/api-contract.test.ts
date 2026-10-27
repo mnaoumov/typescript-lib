@@ -42,17 +42,17 @@ import {
 } from './type-guards.ts';
 
 interface CounterApi {
-  count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
+  readonly count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
   readonly name: string;
-  reset: () => void;
+  readonly reset: () => void;
 }
 
 interface LabelledPoint extends Point {
-  label?: string;
+  readonly label?: string;
 }
 
 interface Point {
-  x: number;
+  readonly x: number;
 }
 
 class PointClass implements Point {

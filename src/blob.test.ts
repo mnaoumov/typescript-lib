@@ -19,7 +19,7 @@ import {
 import { castTo } from './object-utils.ts';
 
 interface BlobWithParts {
-  _parts?: string[];
+  readonly _parts?: string[];
 }
 
 class MockFileReader {

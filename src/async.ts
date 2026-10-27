@@ -496,7 +496,7 @@ export interface TimeoutContext {
    *
    * @param callback - The function to call when the operation completes.
    */
-  onOperationCompleted: (callback: () => void) => void;
+  readonly onOperationCompleted: (callback: () => void) => void;
   /**
    * The name of the operation.
    */
@@ -504,7 +504,7 @@ export interface TimeoutContext {
   /**
    * Terminates the operation that timed out.
    */
-  terminateOperation: () => void;
+  readonly terminateOperation: () => void;
 }
 
 /**

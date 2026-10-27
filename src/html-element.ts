@@ -90,19 +90,19 @@ export interface ValidatorElement extends HTMLElement {
    *
    * @returns `true` if the element is valid, `false` otherwise.
    */
-  checkValidity: () => boolean;
+  readonly checkValidity: () => boolean;
 
   /**
    * Reports the validity of the element.
    */
-  reportValidity: () => boolean;
+  readonly reportValidity: () => boolean;
 
   /**
    * Sets a custom error message on the element.
    *
    * @param error - The error message to set on the element.
    */
-  setCustomValidity: (error: string) => void;
+  readonly setCustomValidity: (error: string) => void;
 
   /**
    * An error message of the element.

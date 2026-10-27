@@ -16,7 +16,7 @@ import {
 } from './function.ts';
 
 interface ValueHolder {
-  value: number;
+  readonly value: number;
 }
 
 describe('Function', () => {

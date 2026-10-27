@@ -42,7 +42,7 @@ export interface DebugController {
    *
    * @param namespaces - Single namespace string or array of namespace strings to disable
    */
-  disable: (namespaces: string | string[]) => void;
+  readonly disable: (namespaces: string | string[]) => void;
 
   /**
    * Enable specific debug namespaces. Note that explicitly disabled
@@ -61,7 +61,7 @@ export interface DebugController {
    *
    * @param namespaces - Single namespace string or array of namespace strings to enable
    */
-  enable: (namespaces: string | string[]) => void;
+  readonly enable: (namespaces: string | string[]) => void;
 
   /**
    * Get currently configured debug namespaces.
@@ -73,7 +73,7 @@ export interface DebugController {
    *
    * @returns Array of enabled and disabled (prefixed with `-`) debug namespaces
    */
-  get: () => string[];
+  readonly get: () => string[];
 
   /**
    * Set debug namespaces, replacing all previous configurations.
@@ -88,7 +88,7 @@ export interface DebugController {
    *
    * @param namespaces - String or array of namespace patterns
    */
-  set: (namespaces: string | string[]) => void;
+  readonly set: (namespaces: string | string[]) => void;
 }
 
 /* v8 ignore stop */

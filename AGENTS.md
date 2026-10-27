@@ -88,6 +88,10 @@ export function myFunction(param: Type): ReturnType {
 - Sorted alphabetically (enforced by `eslint-plugin-perfectionist`)
 - Always include `.ts` extension in relative imports
 
+### Interface members
+
+- Interface and object-type-alias property signatures are readonly by default, enforced by `typescript-dev-toolkit/readonly-interface-members`. A member that is reassigned needs a property-level `eslint-disable-next-line` explaining the mutation, as in `src/error.ts`'s shared state. This rule does not make array elements readonly.
+
 ### L2. Timing primitives must be fake-timer controllable
 
 - Delay/timeout primitives (e.g. `sleep`, `abortSignalTimeout`, `setTimeoutAsync`) must be built on `globalThis.setTimeout`, never on the native `AbortSignal.timeout`. Vitest fake timers patch `setTimeout` but not `AbortSignal.timeout` (it owns an internal timer they cannot advance), so a primitive built on `AbortSignal.timeout` runs in real wall-clock time even under `vi.useFakeTimers()` — making it and everything layered on it non-deterministic and slow to test.
