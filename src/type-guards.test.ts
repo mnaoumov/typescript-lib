@@ -43,8 +43,8 @@ import {
 type Letter = 'A' | 'B';
 
 interface Shape {
-  label?: string;
-  size: number;
+  readonly label?: string;
+  readonly size: number;
 }
 
 class Base {

@@ -456,8 +456,8 @@ describe('AsyncEvents', () => {
 });
 
 interface TestEventMap {
-  greet: [name: string];
-  save: [];
+  readonly greet: [name: string];
+  readonly save: [];
 }
 
 type TestEventName = keyof TestEventMap;
@@ -550,7 +550,7 @@ describe('mixinAsyncEvents', () => {
 });
 
 interface PingEventMap {
-  ping: [value: number];
+  readonly ping: [value: number];
 }
 
 describe('subscribeAsyncDisposableEvent', () => {

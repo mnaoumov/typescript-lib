@@ -26,8 +26,8 @@ import {
 import { noopAsync } from './function.ts';
 
 interface CounterApi {
-  count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
-  reset: () => void;
+  readonly count: (text: string, isCaseSensitive?: boolean) => Promise<number>;
+  readonly reset: () => void;
 }
 
 const { createArgumentsSchema, createTypeGuardSchema: createBoundTypeGuardSchema } = createApiContractSchemaBuilders('counter');

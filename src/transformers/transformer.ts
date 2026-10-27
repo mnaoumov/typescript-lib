@@ -15,12 +15,12 @@ interface TransformedValueWrapper {
   /**
    * An id of the transformer that transformed the value.
    */
-  __transformerId: string;
+  readonly __transformerId: string;
 
   /**
    * A transformed value.
    */
-  transformedValue: unknown;
+  readonly transformedValue: unknown;
 }
 
 /**

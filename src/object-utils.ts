@@ -129,16 +129,16 @@ interface ApplySubstitutionsParams {
 }
 
 interface EqualityComparerEntry<T> {
-  constructor: Constructor<T>;
-  equalityComparer: (a: T, b: T) => boolean;
+  readonly constructor: Constructor<T>;
+  readonly equalityComparer: (a: T, b: T) => boolean;
 }
 
 interface JSONSerializable {
-  toJSON: (...$arguments: unknown[]) => unknown;
+  readonly toJSON: (...$arguments: unknown[]) => unknown;
 }
 
 interface ModuleWithDefaultExport<T> {
-  default: T;
+  readonly default: T;
 }
 
 interface ResolvedToJsonOptions extends ToJsonOptions {
@@ -146,9 +146,9 @@ interface ResolvedToJsonOptions extends ToJsonOptions {
 }
 
 interface TokenSubstitutions {
-  circularReference: string;
-  maxDepthLimitReached: string;
-  toJSONFailed: string;
+  readonly circularReference: string;
+  readonly maxDepthLimitReached: string;
+  readonly toJSONFailed: string;
 }
 
 const KEY_SEPARATOR = '.';

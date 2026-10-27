@@ -34,20 +34,20 @@ import {
 } from './type-guards.ts';
 
 interface NormalizeTestObject {
-  a: number;
-  b?: number;
+  readonly a: number;
+  readonly b?: number;
 }
 
 interface RemoveUndefinedKeepTestObject {
-  a: number | undefined;
-  b?: number | undefined;
-  c: number;
+  readonly a: number | undefined;
+  readonly b?: number | undefined;
+  readonly c: number;
 }
 
 interface RemoveUndefinedTestObject {
-  a: number;
-  b?: undefined;
-  c: string;
+  readonly a: number;
+  readonly b?: undefined;
+  readonly c: string;
 }
 
 describe('ObjectUtils', () => {
@@ -402,8 +402,8 @@ describe('ObjectUtils', () => {
   describe('nameof', () => {
     it('should return the property name', () => {
       interface TestObject {
-        myProperty: string;
-        other: number;
+        readonly myProperty: string;
+        readonly other: number;
       }
       expect(nameof<TestObject>('myProperty')).toBe('myProperty');
     });

@@ -89,7 +89,7 @@ type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y 
 
 // The minimal shape {@link ExtractEventMap} operates on: a type exposing an overloaded `on` method.
 interface EventsWithOn {
-  on: GenericFunction;
+  readonly on: GenericFunction;
 }
 
 type Includes<Type extends readonly unknown[], Member> = Type extends readonly [infer First, ...infer Rest] ? Equal<First, Member> extends true ? true : Includes<Rest, Member>
@@ -127,11 +127,11 @@ type TupleToCSV<Tuple extends readonly unknown[]> = Tuple extends readonly [infe
  * @typeParam Type - The captured type.
  */
 interface TypeAssertions<Type> {
-  assertAllKeys: [Type] extends [object] ? <const Keys extends readonly string[]>(
+  readonly assertAllKeys: [Type] extends [object] ? <const Keys extends readonly string[]>(
       keys: ExactMembers<StringKeys<Type>, Keys>
     ) => readonly (keyof Type)[]
     : never;
-  assertAllMembers: [Type] extends [LiteralKey] ? <const Keys extends readonly LiteralKey[]>(
+  readonly assertAllMembers: [Type] extends [LiteralKey] ? <const Keys extends readonly LiteralKey[]>(
       keys: ExactMembers<Type, Keys>
     ) => readonly Type[]
     : never;

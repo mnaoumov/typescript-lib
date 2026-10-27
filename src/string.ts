@@ -42,32 +42,32 @@ export interface ReplaceArguments<CapturedGroupArguments extends string[]> {
   /**
    * Captured group arguments.
    */
-  capturedGroupArguments: CapturedGroupArguments;
+  readonly capturedGroupArguments: CapturedGroupArguments;
 
   /**
    * Groups of the match.
    */
-  groups: Record<string, string | undefined> | undefined;
+  readonly groups: Record<string, string | undefined> | undefined;
 
   /**
    * Indices of the groups that were not found in the match.
    */
-  missingGroupIndices: number[];
+  readonly missingGroupIndices: number[];
 
   /**
    * An offset of the match.
    */
-  offset: number;
+  readonly offset: number;
 
   /**
    * A source of the match.
    */
-  source: string;
+  readonly source: string;
 
   /**
    * A substring of the match.
    */
-  substring: string;
+  readonly substring: string;
 }
 
 /**
