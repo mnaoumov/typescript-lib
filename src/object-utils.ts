@@ -662,15 +662,15 @@ export function deleteProperty<T extends object>($object: T, propertyName: keyof
  * Useful to handle incorrect default export interop between ESM and CJS.
  *
  * @typeParam T - The type of the default export.
- * @param module - The module to extract the default export from.
+ * @param $module - The module to extract the default export from.
  * @returns The default export.
  */
-export function extractDefaultExportInterop<T>(module: ModuleWithDefaultExport<T> | T): T {
-  if (typeof module !== 'object' || module === null) {
-    return module;
+export function extractDefaultExportInterop<T>($module: ModuleWithDefaultExport<T> | T): T {
+  if (typeof $module !== 'object' || $module === null) {
+    return $module;
   }
 
-  return 'default' in module ? module.default : module;
+  return 'default' in $module ? $module.default : $module;
 }
 
 /**
