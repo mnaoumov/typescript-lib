@@ -26,9 +26,9 @@ class MockFileReader {
   public result: ArrayBuffer | null | string = null;
   private readonly listeners: Record<string, GenericVoidFunction[]> = {};
 
-  public addEventListener(event: string, $function: GenericVoidFunction): void {
-    this.listeners[event] ??= [];
-    this.listeners[event].push($function);
+  public addEventListener($event: string, $function: GenericVoidFunction): void {
+    this.listeners[$event] ??= [];
+    this.listeners[$event].push($function);
   }
 
   public readAsArrayBuffer(blob: Blob): void {
@@ -68,8 +68,8 @@ class MockImage {
 
   private onloadFunction: (() => void) | null = null;
 
-  public addEventListener(event: string, $function: () => void): void {
-    if (event === 'load') {
+  public addEventListener($event: string, $function: () => void): void {
+    if ($event === 'load') {
       this.onloadFunction = $function;
     }
   }

@@ -358,8 +358,8 @@ describe('ObjectUtils', () => {
 
   describe('extractDefaultExportInterop', () => {
     it('should extract default export from module-like object', () => {
-      const module = { default: 'value' };
-      expect(extractDefaultExportInterop(module)).toBe('value');
+      const $module = { default: 'value' };
+      expect(extractDefaultExportInterop($module)).toBe('value');
     });
 
     it('should return value directly if no default property', () => {
