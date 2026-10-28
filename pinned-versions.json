@@ -1,11 +1,5 @@
 {
   "pins": {
-    "@babel/core": {
-      "section": "devDependencies",
-      "why": "Supply Babel 7 for svelte-preprocess's optional peer; Stryker installs Babel 8 separately.",
-      "check": "npm view svelte-preprocess@latest peerDependencies.@babel/core",
-      "expect": "^7.10.2"
-    },
     "js-yaml": {
       "section": "overrides",
       "why": "Existing exact override inherited from the standalone repository's initial dependency tree.",
