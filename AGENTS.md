@@ -12,6 +12,8 @@ Filing from the CLI or the API (`gh issue create --body`, or an AI agent filing 
 
 It is the bottom of the `@mnaoumov` package graph: it depends on none of the others, and the four other packages all depend on it. It runs in Node, in a browser renderer and inside Obsidian, desktop and mobile, so its ESLint config holds shipped source to Node 16.16.0 (`minimumNodeVersion` in `scripts/eslint-config.ts`), the oldest Node an Obsidian installer that still receives updates ships.
 
+`errorToString` in `src/error.ts` is mirrored by `mnaoumov/obsidian-integration-testing:src/error-to-string.ts`; keep their formatter behavior synchronized. If source-map stack preparation throws, it retries stack access synchronously with `Error.prepareStackTrace` temporarily removed and restores the hook in `finally`, preserving the original generated-code frames. A stack getter that still throws uses the guarded string fallback.
+
 - `src/` — the sources, one module per file, each a published subpath (`@mnaoumov/typescript-lib/<module>`). The `index.ts` barrels and the `.d.ts` files beside the sources are build outputs and gitignored.
 - A module that only works on one platform carries a `desktop-` / `mobile-` prefix (`desktop-zip-extractor.ts`), and the ESLint config lets exactly those import Node builtins. See the carried rule L5 below.
 - `unicorn/prefer-global-this` is off: the DOM helpers address `window` on purpose, and the rule's autofix chains with `unicorn/no-unnecessary-global-this` into a bare global read that throws exactly where the global is absent.
