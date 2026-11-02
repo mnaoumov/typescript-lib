@@ -222,6 +222,30 @@ describe('errorToString', () => {
     expect(result).toContain('errorToString could not format this error: Error: cause getter failed');
   });
 
+  it('should recover the original stack when a source-map formatter throws and restore that formatter', () => {
+    function brokenPrepareStackTrace(): never {
+      throw new TypeError('code.charCodeAt is not a function');
+    }
+    const originalPrepareStackTrace = Object.getOwnPropertyDescriptor(Error, 'prepareStackTrace');
+    Error.prepareStackTrace = brokenPrepareStackTrace;
+    const error = new Error('Missing injected plugin fix-require-modules');
+
+    try {
+      const result = errorToString(error);
+      expect(result).toContain('Error: Missing injected plugin fix-require-modules');
+      expect(result).toContain('error.test.ts:');
+      expect(result).not.toContain('<unprintable>');
+      expect(result).not.toContain('could not format');
+      expect(Error).toHaveProperty('prepareStackTrace', brokenPrepareStackTrace);
+    } finally {
+      if (originalPrepareStackTrace) {
+        Object.defineProperty(Error, 'prepareStackTrace', originalPrepareStackTrace);
+      } else {
+        Reflect.deleteProperty(Error, 'prepareStackTrace');
+      }
+    }
+  });
+
   it('should keep both the string and the stack when the stack getter throws', () => {
     const error = new Error('real failure');
     Object.defineProperty(error, 'stack', {
