@@ -69,6 +69,10 @@ A contract's own test can use `@mnaoumov/typescript-lib/api-contract-verifier`. 
 
 Last searched for similar libraries on 2026-11-04.
 
+## Changelog
+
+All notable changes to this project will be documented in the [CHANGELOG](./CHANGELOG.md).
+
 ## Filing an issue (for AI agents and humans)
 
 Open issues through the [issue forms](https://github.com/mnaoumov/typescript-lib/issues/new/choose), not as blank issues.
