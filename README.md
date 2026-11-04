@@ -58,6 +58,17 @@ Running the schemas belongs to whoever owns the call path. `@mnaoumov/obsidian-l
 
 A contract's own test can use `@mnaoumov/typescript-lib/api-contract-verifier`. `verifyApiContract(contract, { cases, vendor })` takes valid and invalid sample payloads for each half of each method and returns every violation it finds: a method the contract and the cases disagree on, a missing schema, a wrong vendor, a valid payload refused or an invalid one accepted. It returns a list rather than asserting, so it works under any test runner: `expect(await verifyApiContract(...)).toEqual([])`. `validateSync(schema, value)` runs a schema that must answer synchronously, and throws when it answers with a promise.
 
+## See also
+
+| Library | Features | How `@mnaoumov/typescript-lib` differs |
+| --- | --- | --- |
+| [`@antfu/utils`](https://github.com/antfu/utils) | Opinionated, tree-shakable helpers for arrays, objects, strings, math, time, promises, guards and type utilities, meant to be bundled into the consumer. | Overlaps on promise, string and guard helpers; adds abort-aware timing, disposables, debug namespaces and switches, and API contracts; has fewer array and object helpers. |
+| [`es-toolkit`](https://github.com/toss/es-toolkit) | Performance-focused Lodash replacement with array, object, string, function, promise, predicate, math and error helpers, plus a Lodash compatibility layer. | Narrower collection helpers and no Lodash compatibility; adds disposables, debug logging, path helpers, value providers and Standard Schema API contracts. |
+| [`radashi`](https://github.com/radashi-org/radashi) | Maintained successor to Radash: array, async (`retry`, `sleep`, `timeout`), object, string, number, random and typed-guard helpers. | Overlaps on async and type guards; adds abort-signal helpers, disposables, debug switches and API contracts; has fewer array, object and random helpers. |
+| [`remeda`](https://github.com/remeda/remeda) | Data-first and data-last collection utilities with automatic currying, lazy `pipe` evaluation and precise tuple-aware types. | Not a collection or pipeline library: no `pipe` or currying; it targets async, error, disposable, debug and path concerns instead. |
+
+Last searched for similar libraries on 2026-11-04.
+
 ## Filing an issue (for AI agents and humans)
 
 Open issues through the [issue forms](https://github.com/mnaoumov/typescript-lib/issues/new/choose), not as blank issues.
