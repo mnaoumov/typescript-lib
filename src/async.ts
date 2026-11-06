@@ -38,10 +38,7 @@ import {
   noopAsync
 } from './function.ts';
 import { normalizeOptionalProperties } from './object-utils.ts';
-import {
-  assert,
-  assertNonNullable
-} from './type-guards.ts';
+import { assert } from './type-guards.ts';
 
 /**
  * Parameters for {@link invokeAsyncSafelyAfterDelay}.
@@ -225,12 +222,12 @@ export async function asyncMap<T, U>(array: T[], callback: (value: T, index: num
  * @returns A function that wraps the asynchronous function in a synchronous interface.
  */
 export function convertAsyncToSync<Arguments extends unknown[]>(asyncFunction: GenericAsyncFunction<Arguments>, stackTrace?: string): GenericVoidFunction<Arguments> {
-  stackTrace ??= getStackTrace(1);
+  const outerStackTrace = stackTrace ?? getStackTrace(1);
   return (...$arguments: Arguments): void => {
-    assertNonNullable(stackTrace);
     const innerStackTrace = getStackTrace(1);
-    stackTrace += `\n    at --- convertAsyncToSync --- (0)\n${innerStackTrace}`;
-    invokeAsyncSafely(() => asyncFunction(...$arguments), stackTrace);
+    // Built per call: appending to the captured trace would grow it by one marker on every invocation.
+    const callStackTrace = `${outerStackTrace}\n    at --- convertAsyncToSync --- (0)\n${innerStackTrace}`;
+    invokeAsyncSafely(() => asyncFunction(...$arguments), callStackTrace);
   };
 }
 
