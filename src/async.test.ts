@@ -1627,6 +1627,35 @@ describe('Async', () => {
 
       expect(handler).toHaveBeenCalledTimes(1);
     });
+
+    it('should add exactly one marker per call however often the wrapper is called', async () => {
+      const handler = vi.fn();
+      using _registration = registerAsyncErrorEventHandler(handler);
+      using _ignore = startAsyncErrorIgnoreContext();
+
+      async function asyncFunction(): Promise<never> {
+        await noopAsync();
+        throw new Error('async error');
+      }
+      const syncFunction = convertAsyncToSync(asyncFunction, 'outer stack');
+      const CALL_COUNT = 5;
+
+      for (let index = 0; index < CALL_COUNT; index++) {
+        syncFunction();
+      }
+
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 50);
+      });
+
+      expect(handler).toHaveBeenCalledTimes(CALL_COUNT);
+      const stacks = handler.mock.calls.map(([asyncError]) => String((asyncError as Error).stack));
+      for (const stack of stacks) {
+        expect(stack.split('--- convertAsyncToSync ---')).toHaveLength(2);
+        expect(stack.split('outer stack')).toHaveLength(2);
+      }
+      expect(stacks.at(-1)?.length).toBe(stacks[0]?.length);
+    });
   });
 
   describe('sleep edge cases', () => {
