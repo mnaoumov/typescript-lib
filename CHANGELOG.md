@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 3.0.0
+
+- fix(async): stop convertAsyncToSync growing its stack trace on every call
+- docs: add a Changelog section to the README
+- docs: add See also comparison with similar libraries
+- fix: recover stacks when source maps fail
+- docs: add issue-filing instructions for AI agents
+- chore: add issue forms
+- build(deps): override re2js to ^2.9.1 for GHSA-gg6h-894w-4m9c
+- build(deps): bump typescript-dev-toolkit to ^5.2.0
+- chore(scripts): forward CLI arguments from the test scripts to vitest
+- chore(deps): drop the @babel/core 7 pin and bump typescript-dev-toolkit to 5.1.0
+- chore: fix development dependency audit findings
+- chore: adopt keyword identifier lint rule
+- refactor!: make interface members readonly
+
 ## 2.0.0
 
 - feat(debug)!: remove showInitialDebugMessage
