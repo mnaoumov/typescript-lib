@@ -2,85 +2,136 @@
 
 ## 3.0.0
 
-- fix(async): stop convertAsyncToSync growing its stack trace on every call
-- docs: add a Changelog section to the README
-- docs: add See also comparison with similar libraries
-- fix: recover stacks when source maps fail
-- docs: add issue-filing instructions for AI agents
-- chore: add issue forms
-- build(deps): override re2js to ^2.9.1 for GHSA-gg6h-894w-4m9c
-- build(deps): bump typescript-dev-toolkit to ^5.2.0
-- chore(scripts): forward CLI arguments from the test scripts to vitest
-- chore(deps): drop the @babel/core 7 pin and bump typescript-dev-toolkit to 5.1.0
-- chore: fix development dependency audit findings
-- chore: adopt keyword identifier lint rule
-- refactor!: make interface members readonly
+This release has 1 breaking change, 2 fixes and 3 documentation changes. 7 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
+
+### Breaking changes
+
+- make interface members readonly
+
+### Fixed
+
+- **async:** stop convertAsyncToSync growing its stack trace on every call
+- recover stacks when source maps fail
+
+### Documentation
+
+- add a Changelog section to the README
+- add See also comparison with similar libraries
+- add issue-filing instructions for AI agents
 
 ## 2.0.0
 
-- feat(debug)!: remove showInitialDebugMessage
+This release has 1 breaking change.
+
+### Breaking changes
+
+- **debug:** remove showInitialDebugMessage
 
 ## 1.7.0
 
-- feat(debug): export isDebugNamespaceEnabled and formatDebugGuideReference
+This release has 1 new feature.
+
+### New
+
+- **debug:** export isDebugNamespaceEnabled and formatDebugGuideReference
 
 ## 1.6.2
 
-- fix(debug): print no initial debug message while the plugin's debug messages are disabled
-- fix(path): return the drive root from resolve instead of /F:
-- test(path): kill the surviving mutants in the Windows working-folder code
-- build: add the on-demand Stryker mutation run (test:mutation)
-- docs: point the debug console recipes and the state-slot doc at obsidian-lib
-- test(async): make the runWithTimeout timeout-ordering tests deterministic
+This release has 2 fixes and 1 documentation change. 3 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
+
+### Fixed
+
+- **debug:** print no initial debug message while the plugin's debug messages are disabled
+- **path:** return the drive root from resolve instead of /F:
+
+### Documentation
+
+- point the debug console recipes and the state-slot doc at obsidian-lib
 
 ## 1.6.1
 
-- fix(error): keep printError from hiding the error it prints
+This release has 1 fix.
+
+### Fixed
+
+- **error:** keep printError from hiding the error it prints
 
 ## 1.6.0
 
-- feat(debug): let Library.init take debug namespace aliases
-- chore(build): drop the duplicate build:compile:typescript script
-- build(docs): use typescript-dev-toolkit 3.7.0's shared guide-snippet and outdated-reference checks
-- docs: check guide snippets and retired obsidian-dev-utils references
-- build(deps): take typescript-dev-toolkit 3.6.2 for the logo-aware OG card cache
-- docs: replace the docs site logo and favicon with the approved mark
+This release has 1 new feature and 2 documentation changes. 3 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
+
+### New
+
+- **debug:** let Library.init take debug namespace aliases
+
+### Documentation
+
+- check guide snippets and retired obsidian-dev-utils references
+- replace the docs site logo and favicon with the approved mark
 
 ## 1.5.0
 
-- feat: add an api-contract verifier, objectGuard/optionsGuard and exact-optional objectTypeGuard
+This release has 1 new feature.
+
+### New
+
+- add an api-contract verifier, objectGuard/optionsGuard and exact-optional objectTypeGuard
 
 ## 1.4.0
 
-- feat(debug-switches): add a debug switch registry
+This release has 1 new feature.
+
+### New
+
+- **debug-switches:** add a debug switch registry
 
 ## 1.3.0
 
-- feat(type-guards): add type-guard combinators and a vendor-bound schema builder
-- build: validate the published output's dependencies in the build
-- ci(docs-site): set the repository homepage from the docs site build
-- build(deps): take typescript-dev-toolkit 3.0.0
-- docs: show the package logo as the home page hero image
+This release has 1 new feature and 1 documentation change. 3 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
+
+### New
+
+- **type-guards:** add type-guard combinators and a vendor-bound schema builder
+
+### Documentation
+
+- show the package logo as the home page hero image
 
 ## 1.2.0
 
-- feat(async): add an app-wide switch for runWithTimeout's default termination
-- docs: link mnaoumov.dev/typescript-lib from the README
+This release has 1 new feature and 1 documentation change.
+
+### New
+
+- **async:** add an app-wide switch for runWithTimeout's default termination
+
+### Documentation
+
+- link mnaoumov.dev/typescript-lib from the README
 
 ## 1.1.1
 
-- docs: publish the documentation site at mnaoumov.dev/typescript-lib
-- build(deps): take @mnaoumov/typescript-dev-toolkit 2.0.0 and its rule namespace
+This release has 1 documentation change. 1 maintenance commit (tests, build, CI, refactoring, dependencies) is not listed.
+
+### Documentation
+
+- publish the documentation site at mnaoumov.dev/typescript-lib
 
 ## 1.1.0
 
-- feat(api-contract): add the api-contract subpath
+This release has 1 new feature.
+
+### New
+
+- **api-contract:** add the api-contract subpath
 
 ## 1.0.1
 
-- build: keep pure subpaths free of node and DOM globals
-- build: add the lockfile, resolved against npm now that every sibling is published
-- docs: drop the stale note about the seeded lock holding obsidian 1.13.1
+This release has 1 documentation change. 2 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
+
+### Documentation
+
+- drop the stale note about the seeded lock holding obsidian 1.13.1
 
 ## 1.0.0
 
