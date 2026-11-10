@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.1.0
+
+- feat(disposable): return DisposableEx from every API that hands out a disposable
+- fix(async-events): let a caller generic over the event name forward its listener
+- docs(changelog): regroup the published release notes for readers
+
 ## 3.0.0
 
 This release has 1 breaking change, 2 fixes and 3 documentation changes. 7 maintenance commits (tests, build, CI, refactoring, dependencies) are not listed.
