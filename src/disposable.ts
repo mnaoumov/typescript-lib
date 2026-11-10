@@ -397,7 +397,7 @@ export class CombineAsyncDisposable extends AsyncDisposableBase {
     const errors: unknown[] = [];
     for (const child of this.getOrderedChildren()) {
       try {
-        await child[Symbol.asyncDispose]();
+        await disposeAsync(child);
       } catch (error) {
         if (this.errorBehavior === DisposeErrorBehavior.FailFast) {
           throw error;
@@ -457,7 +457,7 @@ export class CombineDisposable extends DisposableBase {
     const errors: unknown[] = [];
     for (const child of this.getOrderedChildren()) {
       try {
-        child[Symbol.dispose]();
+        dispose(child);
       } catch (error) {
         if (this.errorBehavior === DisposeErrorBehavior.FailFast) {
           throw error;

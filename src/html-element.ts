@@ -13,6 +13,8 @@
 
 import type { Promisable } from 'type-fest';
 
+import type { DisposableEx } from './disposable.ts';
+
 import { CallbackDisposable } from './disposable.ts';
 import { ensureNonNullable } from './type-guards.ts';
 
@@ -339,9 +341,9 @@ export function isLoaded(element: Element): boolean {
  *
  * @param node - The node to add the event listener to.
  * @param callback - The callback to call when the event is triggered.
- * @returns A {@link Disposable} that removes the event listeners when disposed, for use with `using`.
+ * @returns A {@link DisposableEx} that removes the event listeners when disposed, for use with `using`.
  */
-export function onAncestorScrollOrResize(node: Node, callback: () => void): Disposable {
+export function onAncestorScrollOrResize(node: Node, callback: () => void): DisposableEx {
   const win = getNodeWindow(node);
   const ancestors: EventTarget[] = [node.ownerDocument ?? win.document, win];
 

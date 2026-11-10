@@ -4,6 +4,8 @@
  * AbortController utilities.
  */
 
+import type { DisposableEx } from './disposable.ts';
+
 import {
   CallbackDisposable,
   CombineDisposable
@@ -195,9 +197,9 @@ export function getSharedAbortSignal(): AbortSignal {
  *
  * @param abortSignal - The abort signal to add the listener to.
  * @param callback - The callback to call when the abort signal aborts.
- * @returns A {@link Disposable} that removes the abort listener when disposed, for use with `using`.
+ * @returns A {@link DisposableEx} that removes the abort listener when disposed, for use with `using`.
  */
-export function onAbort(abortSignal: AbortSignal, callback: (abortSignal: AbortSignal) => void): Disposable {
+export function onAbort(abortSignal: AbortSignal, callback: (abortSignal: AbortSignal) => void): DisposableEx {
   if (abortSignal.aborted) {
     callback(abortSignal);
     return new CallbackDisposable({ callback: noop });
