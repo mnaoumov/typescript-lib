@@ -4,6 +4,8 @@
  * Contains utility functions for error handling.
  */
 
+import type { DisposableEx } from './disposable.ts';
+
 import { AsyncEvents } from './async-events.ts';
 import {
   CallbackDisposable,
@@ -261,9 +263,9 @@ export function printError(error: unknown, console?: Console): void {
  * {@link startAsyncErrorIgnoreContext} scope regardless of who is listening.
  *
  * @param handler - The handler function to be called when an asynchronous error event occurs.
- * @returns A {@link Disposable} that unregisters the handler when disposed, for use with `using`.
+ * @returns A {@link DisposableEx} that unregisters the handler when disposed, for use with `using`.
  */
-export function registerAsyncErrorEventHandler(handler: (asyncError: unknown) => void): Disposable {
+export function registerAsyncErrorEventHandler(handler: (asyncError: unknown) => void): DisposableEx {
   const eventRef = errorAsyncEvents.on('asyncError', handler);
   return new CallbackDisposable({
     callback: (): void => {
@@ -292,9 +294,9 @@ export function registerAsyncErrorEventHandler(handler: (asyncError: unknown) =>
  *
  * Contexts nest; the ignore only ends once every open context has been disposed.
  *
- * @returns A {@link Disposable} that closes the ignore context when disposed, for use with `using`.
+ * @returns A {@link DisposableEx} that closes the ignore context when disposed, for use with `using`.
  */
-export function startAsyncErrorIgnoreContext(): Disposable {
+export function startAsyncErrorIgnoreContext(): DisposableEx {
   moduleState.asyncErrorIgnoreContextDepth++;
   return new CallbackDisposable({
     callback: (): void => {

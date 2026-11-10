@@ -660,6 +660,8 @@ describe('onAncestorScrollOrResize', () => {
     const node = buildElement();
     const disposable = onAncestorScrollOrResize(node, vi.fn());
     expect(typeof disposable[Symbol.dispose]).toBe('function');
+    expect(typeof disposable.dispose).toBe('function');
+    disposable.dispose();
   });
 
   it('should add scroll and resize listeners to document, window, and the node', () => {

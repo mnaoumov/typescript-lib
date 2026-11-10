@@ -804,6 +804,13 @@ describe('startAsyncErrorIgnoreContext', () => {
     stopCollectingUnhandledAsyncErrors();
   });
 
+  it('should close the ignore context through dispose()', () => {
+    const context = startAsyncErrorIgnoreContext();
+    expect(isAsyncErrorIgnoreContextActive()).toBe(true);
+    context.dispose();
+    expect(isAsyncErrorIgnoreContextActive()).toBe(false);
+  });
+
   it('should report whether an ignore context is active, including nesting', () => {
     expect(isAsyncErrorIgnoreContextActive()).toBe(false);
     {

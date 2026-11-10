@@ -389,6 +389,16 @@ describe('abortSignalAny', () => {
 });
 
 describe('onAbort', () => {
+  it('should return a disposable whose dispose() removes the listener', () => {
+    const controller = new AbortController();
+    const callback = vi.fn();
+    const disposable = onAbort(controller.signal, callback);
+    disposable.dispose();
+    controller.abort();
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
   it('should call callback immediately if signal is already aborted', () => {
     const controller = new AbortController();
     const reason = new Error('already done');
