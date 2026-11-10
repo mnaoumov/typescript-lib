@@ -208,11 +208,16 @@ export interface AsyncEventTrigger<EventMap extends EventMapConstraint<EventMap>
  * - When `EventMap` has explicit keys only (typed map): returns `EventMap[EventName]`,
  *   enforcing the declared argument types and enabling autocomplete.
  *
+ * The typed branch is an indexed access rather than a conditional on `EventName`, so it stays resolvable when
+ * `EventName` is itself a type parameter: a caller generic over the event name, such as
+ * `subscribe<Name extends keyof Map>(name: Name, listener: (...payload: Map[Name]) => void)`, can pass its
+ * listener (or its payload) straight through, because `Map[Name]` relates to `Map[Name & keyof Map]`.
+ *
  * @typeParam EventMap - Maps event names to their argument tuples.
  * @typeParam EventName - The name of the event.
  */
 export type CallbackArguments<EventMap, EventName extends string> = string extends keyof EventMap ? unknown[]
-  : (EventName extends keyof EventMap ? EventMap[EventName] : unknown[]);
+  : EventMap[EventName & keyof EventMap];
 
 /**
  * Base event map type for untyped emitters.
@@ -269,8 +274,15 @@ type AsyncEventNameOf<Source extends GenericAsyncEventSource> = keyof EventMapOf
 
 type EventMapConstraint<T> = Record<keyof T, unknown[]>;
 
+// The phantom marker of `AsyncEventSource` on its own, for `EventMapOf` to infer from.
+interface EventMapMarker<EventMap> {
+  readonly [ASYNC_EVENT_MAP]?: EventMap;
+}
+
 // Recovers the event map of an async event source via the phantom marker on `AsyncEventSource`.
-type EventMapOf<Source> = Source extends AsyncEventSource<infer EventMap> ? EventMap : never;
+// It infers from the marker alone: matching the whole interface would also infer from the method signatures, whose
+// `EventMap[EventName & keyof EventMap]` parameters yield no usable candidate.
+type EventMapOf<Source> = Source extends EventMapMarker<infer EventMap> ? Exclude<EventMap, undefined> : never;
 
 type GenericCallback = GenericPromisableVoidFunction<unknown[]>;
 

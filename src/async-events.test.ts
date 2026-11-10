@@ -3,11 +3,17 @@ import {
   beforeEach,
   describe,
   expect,
+  expectTypeOf,
   it,
   vi
 } from 'vitest';
 
-import type { AsyncEventRef } from './async-events.ts';
+import type {
+  AsyncEventRef,
+  AsyncEventSource,
+  CallbackArguments
+} from './async-events.ts';
+import type { StringKeys } from './type.ts';
 
 import {
   AsyncEvents,
@@ -571,5 +577,55 @@ describe('subscribeAsyncDisposableEvent', () => {
     callback.mockClear();
     events.trigger('ping', 2);
     expect(callback).not.toHaveBeenCalled();
+  });
+});
+
+interface ForwardedEventMap {
+  readonly load: [id: number, shouldForce: boolean];
+  readonly save: [data: string];
+}
+
+class ForwardingEmitter extends AsyncEvents<ForwardedEventMap> {
+  public emit<Name extends StringKeys<ForwardedEventMap>>(name: Name, ...payload: ForwardedEventMap[Name]): void {
+    this.trigger(name, ...payload);
+  }
+}
+
+function subscribeForwarded<Name extends StringKeys<ForwardedEventMap>>(
+  source: AsyncEventSource<ForwardedEventMap>,
+  name: Name,
+  listener: (...payload: ForwardedEventMap[Name]) => void
+): AsyncEventRef {
+  return source.on(name, listener);
+}
+
+describe('CallbackArguments', () => {
+  it('should resolve a typed map to the declared tuple and an untyped map to unknown[]', () => {
+    expectTypeOf<CallbackArguments<ForwardedEventMap, 'save'>>().toEqualTypeOf<[data: string]>();
+    expectTypeOf<CallbackArguments<ForwardedEventMap, 'load' | 'save'>>().toEqualTypeOf<[data: string] | [id: number, shouldForce: boolean]>();
+    expectTypeOf<CallbackArguments<Record<string, unknown[]>, 'anything'>>().toEqualTypeOf<unknown[]>();
+  });
+
+  it('should let a caller generic over the event name forward its listener and payload', () => {
+    const emitter = new ForwardingEmitter();
+    const saveListener = vi.fn<(data: string) => void>();
+    const loadListener = vi.fn<(id: number, shouldForce: boolean) => void>();
+
+    subscribeForwarded(emitter, 'save', saveListener);
+    subscribeForwarded(emitter, 'load', loadListener);
+    emitter.emit('save', 'data');
+    emitter.emit('load', 1, true);
+
+    expect(saveListener).toHaveBeenCalledWith('data');
+    expect(loadListener).toHaveBeenCalledWith(1, true);
+  });
+
+  it('should still reject a listener or payload that does not match the event', () => {
+    const emitter = new ForwardingEmitter();
+    // @ts-expect-error -- `save` carries a string, not a number.
+    emitter.on('save', (_data: number) => undefined);
+    // @ts-expect-error -- `load` takes an id and a flag.
+    emitter.emit('load', 'not-a-number', true);
+    expect(emitter).toBeInstanceOf(ForwardingEmitter);
   });
 });
