@@ -104,11 +104,11 @@ const BUILT_IN_DEFINITIONS: readonly DebugSwitchDefinition[] = [TERMINATE_ON_TIM
  * Gets a registered debug switch.
  *
  * @param id - The id of the switch.
- * @returns The switch, or `undefined` if no switch with that id is registered.
+ * @returns The switch, or `null` if no switch with that id is registered.
  */
-export function getDebugSwitch(id: string): DebugSwitch | undefined {
+export function getDebugSwitch(id: string): DebugSwitch | null {
   const definition = getDefinitions().get(id);
-  return definition ? createHandle(definition) : undefined;
+  return definition ? createHandle(definition) : null;
 }
 
 /**

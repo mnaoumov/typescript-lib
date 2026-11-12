@@ -71,6 +71,7 @@ export interface ZipExtractionFileSystem {
    * @param options - The {@link ZipExtractionMkdirOptions}.
    * @returns The first directory created, if any.
    */
+  // eslint-disable-next-line typescript-dev-toolkit/no-undefined-return-type -- Mirrors Node's `fs.mkdirSync`, which returns `undefined` when it creates nothing; the caller passes `fs` itself.
   readonly mkdirSync: (path: string, options: ZipExtractionMkdirOptions) => string | undefined;
 
   /**

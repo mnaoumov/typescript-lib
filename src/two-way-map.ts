@@ -50,7 +50,7 @@ export class TwoWayMap<Key, Value> {
    */
   public deleteKey(key: Key): void {
     const value = this.getValue(key);
-    if (value !== undefined) {
+    if (value !== null) {
       this.valueKeyMap.delete(value);
     }
     this.keyValueMap.delete(key);
@@ -63,7 +63,7 @@ export class TwoWayMap<Key, Value> {
    */
   public deleteValue(value: Value): void {
     const key = this.getKey(value);
-    if (key !== undefined) {
+    if (key !== null) {
       this.keyValueMap.delete(key);
     }
     this.valueKeyMap.delete(value);
@@ -82,20 +82,20 @@ export class TwoWayMap<Key, Value> {
    * Gets a key by its value.
    *
    * @param value - The value.
-   * @returns The key.
+   * @returns The key, or `null` if the map has no such value.
    */
-  public getKey(value: Value): Key | undefined {
-    return this.valueKeyMap.get(value);
+  public getKey(value: Value): Key | null {
+    return this.valueKeyMap.get(value) ?? null;
   }
 
   /**
    * Gets a value by its key.
    *
    * @param key - The key.
-   * @returns The value.
+   * @returns The value, or `null` if the map has no such key.
    */
-  public getValue(key: Key): undefined | Value {
-    return this.keyValueMap.get(key);
+  public getValue(key: Key): null | Value {
+    return this.keyValueMap.get(key) ?? null;
   }
 
   /**

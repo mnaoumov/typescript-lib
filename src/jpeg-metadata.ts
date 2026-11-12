@@ -165,10 +165,11 @@ function createView(bytes: Uint8Array): DataView {
 }
 
 function findInsertOffset(jpegBytes: Uint8Array): number {
-  if (SOI_SIZE + SEGMENT_HEADER_SIZE > jpegBytes.length) {
-    return SOI_SIZE;
-  }
-  if (jpegBytes[SOI_SIZE] !== MARKER_PREFIX || jpegBytes[SOI_SIZE + 1] !== APP0_MARKER) {
+  if (
+    SOI_SIZE + SEGMENT_HEADER_SIZE > jpegBytes.length
+    || jpegBytes[SOI_SIZE] !== MARKER_PREFIX
+    || jpegBytes[SOI_SIZE + 1] !== APP0_MARKER
+  ) {
     return SOI_SIZE;
   }
 

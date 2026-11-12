@@ -172,13 +172,13 @@ describe('Async', () => {
     });
 
     it('should call predicate the correct number of times', async () => {
-      const predicate = vi.fn(async () => {
+      const isKept = vi.fn(async () => {
         await noopAsync();
         return true;
       });
       const array = ['a', 'b', 'c'];
-      await asyncFilter(array, predicate);
-      expect(predicate).toHaveBeenCalledTimes(3);
+      await asyncFilter(array, isKept);
+      expect(isKept).toHaveBeenCalledTimes(3);
     });
 
     it.each([
@@ -186,13 +186,13 @@ describe('Async', () => {
       [2, 'b', 1],
       [3, 'c', 2]
     ])('should pass correct arguments to predicate on call %i', async (callIndex, expectedValue, expectedIndex) => {
-      const predicate = vi.fn(async () => {
+      const isKept = vi.fn(async () => {
         await noopAsync();
         return true;
       });
       const array = ['a', 'b', 'c'];
-      await asyncFilter(array, predicate);
-      expect(predicate).toHaveBeenNthCalledWith(callIndex, expectedValue, expectedIndex, array);
+      await asyncFilter(array, isKept);
+      expect(isKept).toHaveBeenNthCalledWith(callIndex, expectedValue, expectedIndex, array);
     });
 
     it('should not mutate the original array', async () => {
@@ -1030,36 +1030,36 @@ describe('Async', () => {
 
   describe('retryWithTimeout', () => {
     it('should resolve when operationFunction returns true on first attempt', async () => {
-      const $function = vi.fn(async () => {
+      const checkOperation = vi.fn(async () => {
         await noopAsync();
         return true;
       });
 
       await retryWithTimeout({
-        operationFunction: $function,
+        operationFunction: checkOperation,
         retryOptions: { timeoutInMilliseconds: 5000 }
       });
 
-      expect($function).toHaveBeenCalledTimes(1);
+      expect(checkOperation).toHaveBeenCalledTimes(1);
     });
 
     it('should retry until operationFunction returns true', async () => {
       let attempt = 0;
-      const $function = vi.fn(async () => {
+      const checkOperation = vi.fn(async () => {
         await noopAsync();
         attempt++;
         return attempt >= 3;
       });
 
       await retryWithTimeout({
-        operationFunction: $function,
+        operationFunction: checkOperation,
         retryOptions: {
           retryDelayInMilliseconds: 10,
           timeoutInMilliseconds: 5000
         }
       });
 
-      expect($function).toHaveBeenCalledTimes(3);
+      expect(checkOperation).toHaveBeenCalledTimes(3);
     });
 
     it('should wait the default 100 ms between attempts and not time out under the default 5 s budget', async () => {
@@ -1098,13 +1098,13 @@ describe('Async', () => {
     });
 
     it('should reject when timeout is reached and the while loop exits due to abort', async () => {
-      const $function = vi.fn(async () => {
+      const checkOperation = vi.fn(async () => {
         await noopAsync();
         return false;
       });
 
       await expect(retryWithTimeout({
-        operationFunction: $function,
+        operationFunction: checkOperation,
         retryOptions: {
           retryDelayInMilliseconds: 10,
           timeoutInMilliseconds: 80
@@ -1113,20 +1113,20 @@ describe('Async', () => {
     });
 
     it('should have called operationFunction at least once before timeout', async () => {
-      const $function = vi.fn(async () => {
+      const checkOperation = vi.fn(async () => {
         await noopAsync();
         return false;
       });
 
       await expect(retryWithTimeout({
-        operationFunction: $function,
+        operationFunction: checkOperation,
         retryOptions: {
           retryDelayInMilliseconds: 10,
           timeoutInMilliseconds: 80
         }
       })).rejects.toThrow();
 
-      expect($function.mock.calls.length).toBeGreaterThanOrEqual(1);
+      expect(checkOperation.mock.calls.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should throw immediately if abortSignal is already aborted', async () => {
@@ -1216,16 +1216,16 @@ describe('Async', () => {
     });
 
     it('should use default retry options when none are specified', async () => {
-      const $function = vi.fn(async () => {
+      const checkOperation = vi.fn(async () => {
         await noopAsync();
         return true;
       });
 
       await retryWithTimeout({
-        operationFunction: $function
+        operationFunction: checkOperation
       });
 
-      expect($function).toHaveBeenCalledTimes(1);
+      expect(checkOperation).toHaveBeenCalledTimes(1);
     });
 
     it('should reject when custom onTimeout terminates the operation', async () => {
@@ -1900,13 +1900,13 @@ describe('Async', () => {
     });
 
     it('should call predicate the correct number of times', async () => {
-      const predicate = vi.fn(async () => {
+      const isKept = vi.fn(async () => {
         await noopAsync();
         return true;
       });
       const array = [10, 20, 30];
-      await asyncFilterInPlace(array, predicate);
-      expect(predicate).toHaveBeenCalledTimes(3);
+      await asyncFilterInPlace(array, isKept);
+      expect(isKept).toHaveBeenCalledTimes(3);
     });
 
     it.each([
@@ -1914,13 +1914,13 @@ describe('Async', () => {
       [2, 20, 1],
       [3, 30, 2]
     ])('should pass correct arguments to predicate on call %i', async (callIndex, expectedValue, expectedIndex) => {
-      const predicate = vi.fn(async () => {
+      const isKept = vi.fn(async () => {
         await noopAsync();
         return true;
       });
       const array = [10, 20, 30];
-      await asyncFilterInPlace(array, predicate);
-      expect(predicate).toHaveBeenNthCalledWith(callIndex, expectedValue, expectedIndex, array);
+      await asyncFilterInPlace(array, isKept);
+      expect(isKept).toHaveBeenNthCalledWith(callIndex, expectedValue, expectedIndex, array);
     });
   });
 

@@ -52,12 +52,12 @@ describe('TwoWayMap', () => {
 
     it('should return undefined for a missing key', () => {
       const map = new TwoWayMap<string, number>();
-      expect(map.getValue('missing')).toBeUndefined();
+      expect(map.getValue('missing')).toBeNull();
     });
 
     it('should return undefined for a missing value', () => {
       const map = new TwoWayMap<string, number>();
-      expect(map.getKey(999)).toBeUndefined();
+      expect(map.getKey(999)).toBeNull();
     });
 
     it('should return the new value when overwriting the same key', () => {
@@ -78,7 +78,7 @@ describe('TwoWayMap', () => {
       const map = new TwoWayMap<string, number>();
       map.set('key', 1);
       map.set('key', 2);
-      expect(map.getKey(1)).toBeUndefined();
+      expect(map.getKey(1)).toBeNull();
     });
 
     it('should map the value to the new key when overwriting the same value', () => {
@@ -99,7 +99,7 @@ describe('TwoWayMap', () => {
       const map = new TwoWayMap<string, number>();
       map.set('a', 100);
       map.set('b', 100);
-      expect(map.getValue('a')).toBeUndefined();
+      expect(map.getValue('a')).toBeNull();
     });
 
     it('should update getValue for the reassigned key', () => {
@@ -123,7 +123,7 @@ describe('TwoWayMap', () => {
       map.set('x', 1);
       map.set('y', 2);
       map.set('x', 2);
-      expect(map.getValue('y')).toBeUndefined();
+      expect(map.getValue('y')).toBeNull();
     });
 
     it('should remove the displaced value after reassignment', () => {
@@ -131,7 +131,7 @@ describe('TwoWayMap', () => {
       map.set('x', 1);
       map.set('y', 2);
       map.set('x', 2);
-      expect(map.getKey(1)).toBeUndefined();
+      expect(map.getKey(1)).toBeNull();
     });
   });
 
@@ -173,13 +173,13 @@ describe('TwoWayMap', () => {
     it('should return undefined for getValue of deleted key', () => {
       const map = new TwoWayMap<string, number>([['a', 1], ['b', 2]]);
       map.deleteKey('a');
-      expect(map.getValue('a')).toBeUndefined();
+      expect(map.getValue('a')).toBeNull();
     });
 
     it('should return undefined for getKey of deleted value', () => {
       const map = new TwoWayMap<string, number>([['a', 1], ['b', 2]]);
       map.deleteKey('a');
-      expect(map.getKey(1)).toBeUndefined();
+      expect(map.getKey(1)).toBeNull();
     });
 
     it('should not affect other keys when deleting a key', () => {
@@ -223,13 +223,13 @@ describe('TwoWayMap', () => {
     it('should return undefined for getValue of the associated key after deleting by value', () => {
       const map = new TwoWayMap<string, number>([['a', 1], ['b', 2]]);
       map.deleteValue(1);
-      expect(map.getValue('a')).toBeUndefined();
+      expect(map.getValue('a')).toBeNull();
     });
 
     it('should return undefined for getKey of deleted value', () => {
       const map = new TwoWayMap<string, number>([['a', 1], ['b', 2]]);
       map.deleteValue(1);
-      expect(map.getKey(1)).toBeUndefined();
+      expect(map.getKey(1)).toBeNull();
     });
 
     it('should not affect other keys when deleting by value', () => {
