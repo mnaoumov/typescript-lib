@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 4.0.0
+
+This release has 1 breaking change.
+
+### Breaking changes
+
+- return null rather than undefined for "no value"
+
 ## 3.1.0
 
 - feat(disposable): return DisposableEx from every API that hands out a disposable
