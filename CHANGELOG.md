@@ -6,7 +6,7 @@ This release has 1 breaking change.
 
 ### Breaking changes
 
-- return null rather than undefined for "no value"
+- return null rather than undefined for "no value": `getDebugSwitch` returns `null` for an unknown id, and `TwoWayMap.getKey` and `TwoWayMap.getValue` return `null` for a missing entry, instead of `undefined`.
 
 ## 3.1.0
 
