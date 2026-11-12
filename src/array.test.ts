@@ -69,16 +69,16 @@ describe('Array', () => {
 
     it('should call predicate the correct number of times', () => {
       const array = ['a', 'b', 'c'];
-      const predicate = vi.fn(() => true);
-      filterInPlace(array, predicate);
-      expect(predicate).toHaveBeenCalledTimes(3);
+      const isKept = vi.fn(() => true);
+      filterInPlace(array, isKept);
+      expect(isKept).toHaveBeenCalledTimes(3);
     });
 
     it.each([[1, 'a'], [2, 'b'], [3, 'c']])('should pass correct arguments to predicate on call %j for value %j', (callIndex, expectedValue) => {
       const array = ['a', 'b', 'c'];
-      const predicate = vi.fn(() => true);
-      filterInPlace(array, predicate);
-      expect(predicate).toHaveBeenNthCalledWith(callIndex, expectedValue, callIndex - 1, expect.any(Array));
+      const isKept = vi.fn(() => true);
+      filterInPlace(array, isKept);
+      expect(isKept).toHaveBeenNthCalledWith(callIndex, expectedValue, callIndex - 1, expect.any(Array));
     });
 
     it('should contain correct elements after filtering', () => {

@@ -288,6 +288,7 @@ export class AsyncCallbackDisposable extends AsyncDisposableBase {
  * @param disposable - the disposable to dispose
  */
 export function dispose(disposable: Disposable): void {
+  // eslint-disable-next-line typescript-dev-toolkit/no-direct-dispose-call -- This IS the helper the rule points to; the symbol is referenced here so callers need not.
   disposable[Symbol.dispose]();
 }
 
@@ -497,6 +498,7 @@ export class CombineDisposable extends DisposableBase {
  * @returns A {@link Promise} that resolves once the disposal completes.
  */
 export async function disposeAsync(asyncDisposable: AsyncDisposable): Promise<void> {
+  // eslint-disable-next-line typescript-dev-toolkit/no-direct-dispose-call -- This IS the helper the rule points to; the symbol is referenced here so callers need not.
   await asyncDisposable[Symbol.asyncDispose]();
 }
 

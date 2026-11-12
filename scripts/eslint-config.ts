@@ -187,6 +187,16 @@ function getJsdocsConfigs(context: EslintConfigContext): Linter.Config[] {
   ]);
 }
 
+// "No value" is `null` in this package; `undefined` stays only where a shape mirrors another API, under a disable.
+function getNoUndefinedReturnTypeConfigs(context: EslintConfigContext): Linter.Config[] {
+  return defineConfig({
+    files: context.allFiles(),
+    rules: {
+      'typescript-dev-toolkit/no-undefined-return-type': 'error'
+    }
+  });
+}
+
 function getTsdocsConfigs(context: EslintConfigContext): Linter.Config[] {
   return defineConfig([
     {
@@ -205,6 +215,7 @@ export const configs: Linter.Config[] = defineEslintConfigs({
       ...getIgnoreConfigs(),
       ...getDesktopModuleConfigs(),
       ...getBrowserGlobalConfigs(),
+      ...getNoUndefinedReturnTypeConfigs(context),
       ...getTsdocsConfigs(context),
       ...getJsdocsConfigs(context)
     ]);

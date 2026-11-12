@@ -40,8 +40,6 @@ import {
   unionTypeGuard
 } from './type-guards.ts';
 
-type Letter = 'A' | 'B';
-
 interface Shape {
   readonly label?: string;
   readonly size: number;
@@ -75,55 +73,57 @@ describe('TypeGuards', () => {
   });
 
   describe('combinators', () => {
+    type Letter = 'A' | 'B';
+
     it('arrayTypeGuard should accept an array whose every item passes', () => {
-      const guard = arrayTypeGuard(isNumber);
-      expectGuard(guard, [[], [1, 2]], [[1, '2'], 1, null, { length: 0 }]);
-      expectTypeOf(guard).guards.toEqualTypeOf<number[]>();
+      const isAccepted = arrayTypeGuard(isNumber);
+      expectGuard(isAccepted, [[], [1, 2]], [[1, '2'], 1, null, { length: 0 }]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<number[]>();
     });
 
     it('functionTypeGuard should accept any function under the given signature', () => {
-      const guard = functionTypeGuard<() => Promise<ArrayBuffer>>();
-      expectGuard(guard, [noop, Base], [{}, null]);
-      expectTypeOf(guard).guards.toEqualTypeOf<() => Promise<ArrayBuffer>>();
+      const isAccepted = functionTypeGuard<() => Promise<ArrayBuffer>>();
+      expectGuard(isAccepted, [noop, Base], [{}, null]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<() => Promise<ArrayBuffer>>();
     });
 
     it('instanceOfTypeGuard should accept an instance of the class or a derived one', () => {
-      const guard = instanceOfTypeGuard(Base);
-      expectGuard(guard, [new Base(), new Derived()], [{ base: true }, null, Base]);
-      expectTypeOf(guard).guards.toEqualTypeOf<Base>();
+      const isAccepted = instanceOfTypeGuard(Base);
+      expectGuard(isAccepted, [new Base(), new Derived()], [{ base: true }, null, Base]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<Base>();
     });
 
     it('literalTypeGuard should accept exactly the listed values', () => {
-      const guard = literalTypeGuard(['a', 1, null, NaN]);
-      expectGuard(guard, ['a', 1, null, NaN], ['b', '1', undefined, 2]);
-      expectTypeOf(guard).guards.toEqualTypeOf<'a' | null | number>();
+      const isAccepted = literalTypeGuard(['a', 1, null, NaN]);
+      expectGuard(isAccepted, ['a', 1, null, NaN], ['b', '1', undefined, 2]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<'a' | null | number>();
     });
 
     it('literalTypeGuard should accept exactly the keys of a record', () => {
-      const guard = literalTypeGuard<Letter>({ A: true, B: true });
-      expectGuard(guard, ['A', 'B'], ['C', 'toString', 1, null]);
-      expectTypeOf(guard).guards.toEqualTypeOf<Letter>();
+      const isAccepted = literalTypeGuard<Letter>({ A: true, B: true });
+      expectGuard(isAccepted, ['A', 'B'], ['C', 'toString', 1, null]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<Letter>();
     });
 
     it('literalTypeGuard should refuse a record missing a member of the union', () => {
       // @ts-expect-error -- `B` is missing.
-      const guard = literalTypeGuard<Letter>({ A: true });
-      expect(guard('A')).toBe(true);
+      const isAccepted = literalTypeGuard<Letter>({ A: true });
+      expect(isAccepted('A')).toBe(true);
     });
 
     it('nullableTypeGuard and optionalTypeGuard should widen a guard', () => {
-      const nullable = nullableTypeGuard(isString);
-      const optional = optionalTypeGuard(isString);
-      expectGuard(nullable, [null, 'a'], [undefined, 1]);
-      expectGuard(optional, [undefined, 'a'], [null, 1]);
-      expectTypeOf(nullable).guards.toEqualTypeOf<null | string>();
-      expectTypeOf(optional).guards.toEqualTypeOf<string | undefined>();
+      const isNullableString = nullableTypeGuard(isString);
+      const isOptionalString = optionalTypeGuard(isString);
+      expectGuard(isNullableString, [null, 'a'], [undefined, 1]);
+      expectGuard(isOptionalString, [undefined, 'a'], [null, 1]);
+      expectTypeOf(isNullableString).guards.toEqualTypeOf<null | string>();
+      expectTypeOf(isOptionalString).guards.toEqualTypeOf<string | undefined>();
     });
 
     it('unionTypeGuard should accept what any of its guards accepts', () => {
-      const guard = unionTypeGuard(isString, isNumber, isNull);
-      expectGuard(guard, ['a', 1, null], [undefined, true, {}]);
-      expectTypeOf(guard).guards.toEqualTypeOf<null | number | string>();
+      const isAccepted = unionTypeGuard(isString, isNumber, isNull);
+      expectGuard(isAccepted, ['a', 1, null], [undefined, true, {}]);
+      expectTypeOf(isAccepted).guards.toEqualTypeOf<null | number | string>();
       expectGuard(unionTypeGuard(), [], [undefined, 1]);
     });
 
@@ -147,8 +147,8 @@ describe('TypeGuards', () => {
     });
 
     it('should accept unknown keys by default and refuse them when asked', () => {
-      const strict = objectTypeGuard<Shape>({ label: optionalTypeGuard(isString), size: isNumber }, { shouldRejectUnknownKeys: true });
-      expectGuard(strict, [{ size: 1 }, { label: 'a', size: 1 }], [{ extra: true, size: 1 }]);
+      const isStrictShape = objectTypeGuard<Shape>({ label: optionalTypeGuard(isString), size: isNumber }, { shouldRejectUnknownKeys: true });
+      expectGuard(isStrictShape, [{ size: 1 }, { label: 'a', size: 1 }], [{ extra: true, size: 1 }]);
       expect(objectTypeGuard<Shape>({ label: optionalTypeGuard(isString), size: isNumber }, {})({ extra: true, size: 1 })).toBe(true);
     });
 
@@ -179,8 +179,8 @@ describe('TypeGuards', () => {
       });
 
       it('should still refuse unknown keys when asked', () => {
-        const strict = objectTypeGuard<Shape>({ label: isString, size: isNumber }, { exactOptionalKeys: { label: true }, shouldRejectUnknownKeys: true });
-        expectGuard(strict, [{ size: 1 }], [{ extra: true, size: 1 }]);
+        const isStrictShape = objectTypeGuard<Shape>({ label: isString, size: isNumber }, { exactOptionalKeys: { label: true }, shouldRejectUnknownKeys: true });
+        expectGuard(isStrictShape, [{ size: 1 }], [{ extra: true, size: 1 }]);
       });
 
       it('should require every optional key and only optional keys', () => {

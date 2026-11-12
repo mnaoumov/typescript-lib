@@ -18,7 +18,6 @@ interface ErrorAsyncEventMap {
 }
 
 const errorAsyncEvents = new AsyncEvents<ErrorAsyncEventMap>();
-// eslint-disable-next-line unicorn/no-top-level-side-effects -- Installing the default handler on import is what this module is for. Deferring it behind a call would mean every consumer had to remember to make that call before the first async error, which is precisely the moment the handler needs to already exist.
 errorAsyncEvents.on('asyncError', handleAsyncError);
 
 interface ModuleState {
@@ -386,16 +385,17 @@ function getErrorLines(error: unknown): ErrorLine[] {
  * Reads the original stack, retrying without a broken V8 source-map hook rather than losing the frames.
  *
  * @param error - The error whose stack to read.
- * @returns The stack, when the engine supplies one.
+ * @returns The stack, or `null` when the engine supplies none.
  */
-function getErrorStack(error: Error): string | undefined {
+function getErrorStack(error: Error): null | string {
+  let stack: string | undefined;
   try {
-    return error.stack;
+    stack = error.stack;
   } catch {
     const originalPrepareStackTrace = Object.getOwnPropertyDescriptor(Error, 'prepareStackTrace');
     try {
       Reflect.deleteProperty(Error, 'prepareStackTrace');
-      return error.stack;
+      stack = error.stack;
     } finally {
       if (originalPrepareStackTrace) {
         Object.defineProperty(Error, 'prepareStackTrace', originalPrepareStackTrace);
@@ -404,6 +404,7 @@ function getErrorStack(error: Error): string | undefined {
       }
     }
   }
+  return stack ?? null;
 }
 
 /**
@@ -424,18 +425,16 @@ function getFallbackErrorString(error: unknown, formattingError: unknown): strin
 function getOwnErrorLines(error: Error): ErrorLine[] {
   const headerLines = getErrorHeader(error).split('\n').map((text) => toTitleLine(text));
   const stack = getErrorStack(error);
-  if (stack === undefined) {
+  if (stack === null) {
     return headerLines;
   }
 
   const stackLines = stack.split('\n');
-  if (hasStackHeader()) {
-    return stackLines.map((text) => ({ isFrame: text.startsWith(STACK_TRACE_PREFIX), text }));
-  }
-
   // On an engine without a header line, the `.stack` is frames only, in its own `name@url:line:col` form, so the message is nowhere in it:
   // Prepend the header, and take every stack line as a frame.
-  return [...headerLines, ...stackLines.filter((text) => text.trim() !== '').map((text) => ({ isFrame: true, text }))];
+  return hasStackHeader()
+    ? stackLines.map((text) => ({ isFrame: text.startsWith(STACK_TRACE_PREFIX), text }))
+    : [...headerLines, ...stackLines.filter((text) => text.trim() !== '').map((text) => ({ isFrame: true, text }))];
 }
 
 /**

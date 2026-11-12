@@ -777,7 +777,7 @@ export function isDeepEqual(a: unknown, b: unknown): boolean {
 
   if (aConstructor !== Object) {
     const result = deepEqualTyped(a, b);
-    if (result !== undefined) {
+    if (result !== null) {
       return result;
     }
   }
@@ -993,18 +993,18 @@ function createEqualityComparerEntry<T>(constructor: Constructor<T>, checkIsEqua
   };
 }
 
-function deepEqualTyped(a: unknown, b: unknown): boolean | undefined {
+function deepEqualTyped(a: unknown, b: unknown): boolean | null {
   for (const entry of equalityComparerEntries) {
     const result = tryEntryEquality({
       a,
       b,
       entry
     });
-    if (result !== undefined) {
+    if (result !== null) {
       return result;
     }
   }
-  return undefined;
+  return null;
 }
 
 function isDeepEqualArrayBuffer(a: ArrayBuffer, b: ArrayBuffer): boolean {
@@ -1071,11 +1071,11 @@ function makePlaceholder(key: TokenSubstitutionKey, index?: number): string {
   return `[[${PLACEHOLDER_KEY_PREFIX}${key}${index ? String(index) : ''}]]`;
 }
 
-function tryEntryEquality(params: TryEntryEqualityParams): boolean | undefined {
+function tryEntryEquality(params: TryEntryEqualityParams): boolean | null {
   const {
     a,
     b,
     entry
   } = params;
-  return a instanceof entry.constructor && b instanceof entry.constructor ? entry.equalityComparer(a, b) : undefined;
+  return a instanceof entry.constructor && b instanceof entry.constructor ? entry.equalityComparer(a, b) : null;
 }

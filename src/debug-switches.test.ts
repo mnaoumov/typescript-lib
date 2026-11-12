@@ -62,7 +62,7 @@ describe('debug-switches', () => {
 
   describe('getDebugSwitch', () => {
     it('should return undefined for an unregistered id', () => {
-      expect(getDebugSwitch('test:missing')).toBeUndefined();
+      expect(getDebugSwitch('test:missing')).toBeNull();
     });
 
     it('should return a handle to a registered switch', () => {
