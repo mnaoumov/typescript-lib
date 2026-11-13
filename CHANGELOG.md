@@ -10,9 +10,19 @@ This release has 1 breaking change.
 
 ## 3.1.0
 
-- feat(disposable): return DisposableEx from every API that hands out a disposable
-- fix(async-events): let a caller generic over the event name forward its listener
-- docs(changelog): regroup the published release notes for readers
+This release has 1 new feature, 1 fix and 1 documentation change.
+
+### New
+
+- **disposable:** return DisposableEx from every API that hands out a disposable
+
+### Fixed
+
+- **async-events:** let a caller generic over the event name forward its listener
+
+### Documentation
+
+- **changelog:** regroup the published release notes for readers
 
 ## 3.0.0
 
