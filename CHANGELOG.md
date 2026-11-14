@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 4.1.0
+
+This release has 1 new feature and 2 documentation changes. 1 maintenance commit (tests, build, CI, refactoring, dependencies) is not listed.
+
+### New
+
+- **event-loop-turn:** yield a macrotask through a MessageChannel
+
+### Documentation
+
+- **changelog:** regroup the raw release notes for readers
+- **changelog:** name the APIs the 4.0.0 breaking change affects
+
 ## 4.0.0
 
 This release has 1 breaking change.
