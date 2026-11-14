@@ -12,8 +12,7 @@
  * The channel is opened on the first turn and closed as soon as nothing waits: an open port with a handler keeps its
  * bundle alive after a plugin unloads, and keeps a Node process from exiting.
  *
- * Ported from `src/turn.ts` of `@insurgently/obsidian-ui` 0.4.0 (https://github.com/insurgently/insurgently-obsidian-ui),
- * under its MIT license:
+ * Ported from `src/turn.ts` of the npm package `@insurgently/obsidian-ui` 0.4.0, under its MIT license:
  *
  * MIT License
  *
