@@ -1,5 +1,7 @@
 # @mnaoumov/typescript-lib
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/mnaoumov) [![npm version](https://img.shields.io/npm/v/@mnaoumov/typescript-lib)](https://www.npmjs.com/package/@mnaoumov/typescript-lib) [![npm downloads](https://img.shields.io/npm/dm/@mnaoumov/typescript-lib)](https://www.npmjs.com/package/@mnaoumov/typescript-lib) [![CI](https://img.shields.io/github/actions/workflow/status/mnaoumov/typescript-lib/ci.yml?branch=main&label=CI)](https://github.com/mnaoumov/typescript-lib/actions/workflows/ci.yml) [![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/mnaoumov/typescript-lib) [![License](https://img.shields.io/github/license/mnaoumov/typescript-lib)](https://github.com/mnaoumov/typescript-lib/blob/main/LICENSE) [![Node.js](https://img.shields.io/node/v/@mnaoumov/typescript-lib)](https://nodejs.org/) [![Types](https://img.shields.io/npm/types/@mnaoumov/typescript-lib)](https://www.npmjs.com/package/@mnaoumov/typescript-lib)
+
 Generic TypeScript utilities, usable in any TypeScript project: async helpers, errors, disposables, strings, paths, debug logging, value transformers and DOM helpers.
 
 ## Installation
