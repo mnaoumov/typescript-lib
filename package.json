@@ -72,7 +72,8 @@
     "dist/",
     "!dist/*.tgz",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "scripts": {
     "build": "jiti scripts/build.ts",
