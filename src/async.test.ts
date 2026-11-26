@@ -315,6 +315,152 @@ describe('Async', () => {
     });
   });
 
+  describe('asyncMap with options', () => {
+    interface Deferred {
+      readonly promise: Promise<void>;
+      readonly reject: (error: Error) => void;
+      readonly resolve: () => void;
+    }
+
+    function createDeferred(): Deferred {
+      let resolve = noop;
+      let reject: (error: Error) => void = noop;
+      const promise = new Promise<void>((innerResolve, innerReject) => {
+        resolve = innerResolve;
+        reject = innerReject;
+      });
+      return { promise, reject, resolve };
+    }
+
+    async function flush(): Promise<void> {
+      for (let index = 0; index < 10; index++) {
+        await noopAsync();
+      }
+    }
+
+    it('should never run more callbacks than the concurrency', async () => {
+      let running = 0;
+      let maxRunning = 0;
+      const result = await asyncMap([1, 2, 3, 4, 5, 6, 7], async (v) => {
+        running++;
+        maxRunning = Math.max(maxRunning, running);
+        await flush();
+        running--;
+        return v * 2;
+      }, { concurrency: 3 });
+      expect(result).toEqual([2, 4, 6, 8, 10, 12, 14]);
+      expect(maxRunning).toBe(3);
+    });
+
+    it('should start the next item as soon as one settles, in array order', async () => {
+      const gates = [createDeferred(), createDeferred(), createDeferred()];
+      const started: number[] = [];
+      const promise = asyncMap([0, 1, 2], async (v, index, array) => {
+        expect(array).toEqual([0, 1, 2]);
+        started.push(index);
+        await gates[v]?.promise;
+        return v;
+      }, { concurrency: 2 });
+      await flush();
+      expect(started).toEqual([0, 1]);
+      gates[1]?.resolve();
+      await flush();
+      expect(started).toEqual([0, 1, 2]);
+      gates[0]?.resolve();
+      gates[2]?.resolve();
+      await expect(promise).resolves.toEqual([0, 1, 2]);
+    });
+
+    it('should accept a concurrency above the length and Infinity with a signal', async () => {
+      await expect(asyncMap([1, 2], (v) => v, { concurrency: 10 })).resolves.toEqual([1, 2]);
+      await expect(asyncMap([1, 2], (v) => v, { abortSignal: new AbortController().signal })).resolves.toEqual([1, 2]);
+    });
+
+    it('should resolve an empty array', async () => {
+      await expect(asyncMap([], (v: number) => v, { concurrency: 2 })).resolves.toEqual([]);
+    });
+
+    it('should skip holes in a sparse array', async () => {
+      // eslint-disable-next-line no-sparse-arrays -- Testing holes.
+      const sparse = [1, , 3] as number[];
+      const callback = vi.fn((v: number) => v);
+      const result = await asyncMap(sparse, callback, { concurrency: 1 });
+      expect(callback).toHaveBeenCalledTimes(2);
+      expect(result).toEqual([1, undefined, 3]);
+    });
+
+    it('should reject with the first error and start no new callbacks', async () => {
+      const error = new Error('boom');
+      const second = createDeferred();
+      const started: number[] = [];
+      const promise = asyncMap([0, 1, 2, 3], async (v) => {
+        started.push(v);
+        if (v === 0) {
+          await noopAsync();
+          throw error;
+        }
+        await second.promise;
+        throw new Error('later');
+      }, { concurrency: 2 });
+      await expect(promise).rejects.toBe(error);
+      second.resolve();
+      await flush();
+      expect(started).toEqual([0, 1]);
+    });
+
+    it('should reject with a synchronous throw', async () => {
+      const error = new Error('sync');
+      await expect(asyncMap([1], () => {
+        throw error;
+      }, { concurrency: 1 })).rejects.toBe(error);
+    });
+
+    it('should reject with the abort reason and start no new callbacks', async () => {
+      const abortController = new AbortController();
+      const first = createDeferred();
+      const started: number[] = [];
+      const promise = asyncMap([0, 1, 2], async (v) => {
+        started.push(v);
+        await first.promise;
+        return v;
+      }, { abortSignal: abortController.signal, concurrency: 1 });
+      await flush();
+      const reason = new Error('stop');
+      abortController.abort(reason);
+      await expect(promise).rejects.toBe(reason);
+      first.resolve();
+      await flush();
+      expect(started).toEqual([0]);
+    });
+
+    it('should reject at once with an already aborted signal', async () => {
+      const callback = vi.fn();
+      const reason = new Error('aborted');
+      await expect(asyncMap([1], callback, { abortSignal: AbortSignal.abort(reason) })).rejects.toBe(reason);
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('should reject an invalid concurrency', async () => {
+      for (const concurrency of [0, -1, 1.5, NaN]) {
+        await expect(asyncMap([1], (v) => v, { concurrency })).rejects.toThrow(RangeError);
+      }
+    });
+
+    it('should pass the options through asyncFlatMap', async () => {
+      let running = 0;
+      let maxRunning = 0;
+      const result = await asyncFlatMap([1, 2, 3], async (v) => {
+        running++;
+        maxRunning = Math.max(maxRunning, running);
+        await flush();
+        running--;
+        return [v, v];
+      }, { concurrency: 1 });
+      expect(result).toEqual([1, 1, 2, 2, 3, 3]);
+      expect(maxRunning).toBe(1);
+    });
+  });
+
   describe('asyncMap', () => {
     it('should map elements with async callback', async () => {
       const result = await asyncMap([1, 2, 3], async (v) => {

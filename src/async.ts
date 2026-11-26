@@ -41,6 +41,28 @@ import { normalizeOptionalProperties } from './object-utils.ts';
 import { assert } from './type-guards.ts';
 
 /**
+ * Options for {@link asyncFlatMap}: the same as {@link AsyncMapOptions}.
+ */
+export type AsyncFlatMapOptions = AsyncMapOptions;
+
+/**
+ * Options for {@link asyncMap} and {@link asyncFlatMap}.
+ */
+export interface AsyncMapOptions {
+  /**
+   * Stops new callbacks from starting and rejects with the signal's reason once aborted.
+   */
+  readonly abortSignal?: AbortSignal;
+
+  /**
+   * The maximum number of callbacks running at once: a positive integer, or `Infinity` for no limit.
+   *
+   * @default `Infinity`
+   */
+  readonly concurrency?: number;
+}
+
+/**
  * Parameters for {@link invokeAsyncSafelyAfterDelay}.
  */
 export interface InvokeAsyncSafelyAfterDelayParams {
@@ -192,25 +214,51 @@ export async function asyncFilterInPlace<T>(array: T[], predicate: (value: T, in
  * @typeParam U - The type of elements in the output array.
  * @param array - The array to map over and flatten.
  * @param callback - The callback function to apply to each element.
+ * @param options - The concurrency limit and abort signal, as for {@link asyncMap}.
  * @returns A {@link Promise} that resolves with a flattened array of the results of the callback function.
  */
-export async function asyncFlatMap<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => Promisable<U[]>): Promise<U[]> {
-  const nestedResults = await asyncMap(array, callback);
+export async function asyncFlatMap<T, U>(
+  array: T[],
+  callback: (value: T, index: number, array: T[]) => Promisable<U[]>,
+  options?: AsyncFlatMapOptions
+): Promise<U[]> {
+  const nestedResults = await asyncMap(array, callback, options);
   return nestedResults.flat();
 }
 
 /**
  * Maps over an array asynchronously, applying the provided callback function to each element.
  *
+ * Without options, every callback starts at once. With a `concurrency`, at most that many callbacks run at a time,
+ * each new one starting as soon as a running one settles, in array order.
+ *
+ * With options, the first callback that throws stops new callbacks from starting, and the returned promise rejects
+ * with that error at once. Aborting the `abortSignal` does the same with the signal's reason. Callbacks already running
+ * are not interrupted: pass the same signal into them if they should stop too.
+ *
+ * Bounded concurrency adapts the worker pool of `radashi`'s `parallel` (MIT, see `THIRD-PARTY-NOTICES.md`).
+ *
  * @typeParam T - The type of elements in the input array.
  * @typeParam U - The type of elements in the output array.
  * @param array - The array to map over.
  * @param callback - The callback function to apply to each element.
- * @returns A {@link Promise} that resolves with an array of the results of the callback function.
+ * @param options - The concurrency limit and abort signal.
+ * @returns A {@link Promise} that resolves with an array of the results of the callback function, in array order.
  */
-export async function asyncMap<T, U>(array: T[], callback: (value: T, index: number, array: T[]) => Promisable<U>): Promise<U[]> {
-  // eslint-disable-next-line unicorn/no-array-callback-reference -- Passing `callback` straight through is the contract: it is declared as `(value, index, array)` so that it receives exactly what `Array#map` supplies. Wrapping it to take only the value would quietly stop forwarding the other two.
-  return await promiseAllSequentially(array.map(callback));
+export async function asyncMap<T, U>(
+  array: T[],
+  callback: (value: T, index: number, array: T[]) => Promisable<U>,
+  options?: AsyncMapOptions
+): Promise<U[]> {
+  const concurrency = options?.concurrency ?? Infinity;
+  if (concurrency !== Infinity && (!Number.isSafeInteger(concurrency) || concurrency < 1)) {
+    throw new RangeError(`concurrency must be a positive integer or Infinity, got ${String(concurrency)}`);
+  }
+
+  return concurrency === Infinity && !options?.abortSignal
+    // eslint-disable-next-line unicorn/no-array-callback-reference -- Passing `callback` straight through is the contract: it is declared as `(value, index, array)` so that it receives exactly what `Array#map` supplies. Wrapping it to take only the value would quietly stop forwarding the other two.
+    ? await promiseAllSequentially(array.map(callback))
+    : await asyncMapBounded(array, callback, concurrency, options?.abortSignal ?? abortSignalNever());
 }
 
 /**
@@ -906,6 +954,69 @@ export async function toArray<T>(iter: AsyncIterableIterator<T>): Promise<T[]> {
     array.push(item);
   }
   return array;
+}
+
+async function asyncMapBounded<T, U>(
+  array: T[],
+  callback: (value: T, index: number, array: T[]) => Promisable<U>,
+  concurrency: number,
+  abortSignal: AbortSignal
+): Promise<U[]> {
+  abortSignal.throwIfAborted();
+  const length = array.length;
+  const results = Array.from({ length }, () => undefined as U);
+  if (length === 0) {
+    return results;
+  }
+
+  let nextIndex = 0;
+  let isStopped = false;
+  let activeWorkerCount = Math.min(concurrency, length);
+
+  return await new Promise<U[]>((resolve, reject) => {
+    abortSignal.addEventListener('abort', onAbort, { once: true });
+    for (let workerIndex = 0; workerIndex < activeWorkerCount; workerIndex++) {
+      runWorker().catch(noop);
+    }
+
+    function onAbort(): void {
+      stop();
+      // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Rejecting with the signal's reason as-is, like `AbortSignal.throwIfAborted`.
+      reject(abortSignal.reason);
+    }
+
+    function stop(): void {
+      isStopped = true;
+      abortSignal.removeEventListener('abort', onAbort);
+    }
+
+    async function runWorker(): Promise<void> {
+      while (!isStopped && nextIndex < length) {
+        const index = nextIndex++;
+        if (!Object.hasOwn(array, index)) {
+          continue;
+        }
+
+        try {
+          results[index] = await callback(array[index] as T, index, array);
+        } catch (error) {
+          // A promise settles once, so a later failure or the abort reason after this one is ignored.
+          stop();
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Rejecting with whatever the callback threw, as `Promise.all` does.
+          reject(error);
+          return;
+        }
+      }
+
+      activeWorkerCount--;
+      if (activeWorkerCount !== 0) {
+        return;
+      }
+
+      stop();
+      resolve(results);
+    }
+  });
 }
 
 function defaultOnTimeout(context: TimeoutContext): void {
