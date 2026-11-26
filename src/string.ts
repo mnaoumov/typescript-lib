@@ -490,7 +490,7 @@ export function replaceAll<CapturedGroupArguments extends string[]>(params: Repl
     : $string.replaceAll(searchValue, (substring: string, ...$arguments: unknown[]) => {
       const SOURCE_INDEX_OFFSET_FOR_GROUP_ARG = 2;
       const hasGroupsArgument = typeof $arguments.at(-1) === 'object';
-      const sourceIndex = hasGroupsArgument ? $arguments.length - SOURCE_INDEX_OFFSET_FOR_GROUP_ARG : $arguments.length - 1;
+      const sourceIndex = $arguments.length - (hasGroupsArgument ? SOURCE_INDEX_OFFSET_FOR_GROUP_ARG : 1);
 
       const replaceArguments: ReplaceArguments<CapturedGroupArguments> = {
         // eslint-disable-next-line no-restricted-syntax -- Can't avoid.
