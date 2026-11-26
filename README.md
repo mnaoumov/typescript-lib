@@ -64,12 +64,13 @@ A contract's own test can use `@mnaoumov/typescript-lib/api-contract-verifier`. 
 
 | Library | Features | How `@mnaoumov/typescript-lib` differs |
 | --- | --- | --- |
-| [`@antfu/utils`](https://github.com/antfu/utils) | Opinionated, tree-shakable helpers for arrays, objects, strings, math, time, promises, guards and type utilities, meant to be bundled into the consumer. | Overlaps on promise, string and guard helpers; adds abort-aware timing, disposables, debug namespaces and switches, and API contracts; has fewer array and object helpers. |
-| [`es-toolkit`](https://github.com/toss/es-toolkit) | Performance-focused Lodash replacement with array, object, string, function, promise, predicate, math and error helpers, plus a Lodash compatibility layer. | Narrower collection helpers and no Lodash compatibility; adds disposables, debug logging, path helpers, value providers and Standard Schema API contracts. |
-| [`radashi`](https://github.com/radashi-org/radashi) | Maintained successor to Radash: array, async (`retry`, `sleep`, `timeout`), object, string, number, random and typed-guard helpers. | Overlaps on async and type guards; adds abort-signal helpers, disposables, debug switches and API contracts; has fewer array, object and random helpers. |
-| [`remeda`](https://github.com/remeda/remeda) | Data-first and data-last collection utilities with automatic currying, lazy `pipe` evaluation and precise tuple-aware types. | Not a collection or pipeline library: no `pipe` or currying; it targets async, error, disposable, debug and path concerns instead. |
+| [`@antfu/utils`](https://github.com/antfu/utils) | Tree-shakable helpers for arrays, objects, strings, math, time, promises and guards; type utilities; meant to be bundled into the consumer | Overlaps on promise, string and guard helpers; adds abort-aware timing, disposables, debug namespaces and switches, API contracts; has fewer array and object helpers |
+| [`abort-controller-x`](https://github.com/deeplay-io/abort-controller-x) | Abortable `delay`, `retry` and `waitForEvent`; `all` and `race` that abort the remaining tasks; `AbortError` helpers | Covers part of the same ground: abort-signal helpers; adds disposables, debug logging, path, string and type-guard helpers; has no `all` or `race` that abort sibling tasks |
+| [`es-toolkit`](https://github.com/toss/es-toolkit) | Lodash replacement: array, object, string, function, promise, predicate, math and error helpers; `debounce`, `throttle`, `Semaphore`, `Mutex`, `limitAsync`; a Lodash compatibility layer | Narrower collection helpers; no Lodash compatibility, timer debounce or semaphore; adds disposables, debug logging, path helpers, value providers, Standard Schema API contracts |
+| [`radashi`](https://github.com/radashi-org/radashi) | Maintained successor to Radash: array, object, string, number, random and typed-guard helpers; `parallel`, `retry`, `sleep`, `timeout`, `tryit` | Overlaps on async helpers and type guards; adds abort-signal helpers, disposables, debug switches, API contracts; has no bounded-concurrency `parallel`; fewer array, object and random helpers |
+| [`remeda`](https://github.com/remeda/remeda) | Data-first and data-last collection utilities; automatic currying; lazy `pipe` evaluation; tuple-aware types | Different focus: no `pipe` or currying; covers async, error, disposable, debug and path concerns instead |
 
-Last searched for similar libraries on 2026-11-04.
+Last searched for similar libraries on 2026-11-26.
 
 ## Changelog
 
