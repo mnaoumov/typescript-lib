@@ -333,7 +333,7 @@ describe('Async', () => {
     }
 
     async function flush(): Promise<void> {
-      for (let i = 0; i < 10; i++) {
+      for (let index = 0; index < 10; index++) {
         await noopAsync();
       }
     }
@@ -441,7 +441,7 @@ describe('Async', () => {
     });
 
     it('should reject an invalid concurrency', async () => {
-      for (const concurrency of [0, -1, 1.5, Number.NaN]) {
+      for (const concurrency of [0, -1, 1.5, NaN]) {
         await expect(asyncMap([1], (v) => v, { concurrency })).rejects.toThrow(RangeError);
       }
     });

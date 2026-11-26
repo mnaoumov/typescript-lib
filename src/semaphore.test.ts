@@ -16,7 +16,7 @@ describe('Semaphore', () => {
   });
 
   it('should reject a capacity that is not a positive integer', () => {
-    for (const capacity of [0, -1, 1.5, Number.NaN, Infinity]) {
+    for (const capacity of [0, -1, 1.5, NaN, Infinity]) {
       expect(() => new Semaphore(capacity)).toThrow(RangeError);
     }
   });
@@ -34,8 +34,12 @@ describe('Semaphore', () => {
     const semaphore = new Semaphore(1);
     await semaphore.acquire();
     const order: number[] = [];
-    const first = semaphore.acquire().then(() => order.push(1));
-    const second = semaphore.acquire().then(() => order.push(2));
+    const first = semaphore.acquire().then(() => {
+      order.push(1);
+    });
+    const second = semaphore.acquire().then(() => {
+      order.push(2);
+    });
     expect(semaphore.waitingCount).toBe(2);
 
     semaphore.release();

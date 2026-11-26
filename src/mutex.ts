@@ -66,12 +66,12 @@ export class Mutex {
    * Runs a function while holding the lock, freeing it when the function settles.
    *
    * @typeParam T - The type of the function's result.
-   * @param fn - The function to run.
-   * @param abortSignal - Cancels the wait for the lock. It does not interrupt `fn` once it has started.
+   * @param operation - The function to run.
+   * @param abortSignal - Cancels the wait for the lock. It does not interrupt `operation` once it has started.
    * @returns A {@link Promise} that resolves with the function's result.
    */
-  public async runExclusive<T>(fn: () => Promisable<T>, abortSignal?: AbortSignal): Promise<T> {
-    return await this.semaphore.runExclusive(fn, abortSignal);
+  public async runExclusive<T>(operation: () => Promisable<T>, abortSignal?: AbortSignal): Promise<T> {
+    return await this.semaphore.runExclusive(operation, abortSignal);
   }
 
   /**

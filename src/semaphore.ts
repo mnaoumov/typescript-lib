@@ -55,7 +55,7 @@ export class Semaphore {
    * @param capacity - The total number of permits, a positive integer.
    */
   public constructor(public readonly capacity: number) {
-    if (!Number.isInteger(capacity) || capacity < 1) {
+    if (!Number.isSafeInteger(capacity) || capacity < 1) {
       throw new RangeError(`capacity must be a positive integer, got ${String(capacity)}`);
     }
     this.availablePermits = capacity;
@@ -115,14 +115,14 @@ export class Semaphore {
    * Runs a function while holding a permit, releasing it when the function settles.
    *
    * @typeParam T - The type of the function's result.
-   * @param fn - The function to run.
-   * @param abortSignal - Cancels the wait for a permit. It does not interrupt `fn` once it has started.
+   * @param operation - The function to run.
+   * @param abortSignal - Cancels the wait for a permit. It does not interrupt `operation` once it has started.
    * @returns A {@link Promise} that resolves with the function's result.
    */
-  public async runExclusive<T>(fn: () => Promisable<T>, abortSignal?: AbortSignal): Promise<T> {
+  public async runExclusive<T>(operation: () => Promisable<T>, abortSignal?: AbortSignal): Promise<T> {
     await this.acquire(abortSignal);
     try {
-      return await fn();
+      return await operation();
     } finally {
       this.release();
     }

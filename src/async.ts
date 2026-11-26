@@ -41,6 +41,11 @@ import { normalizeOptionalProperties } from './object-utils.ts';
 import { assert } from './type-guards.ts';
 
 /**
+ * Options for {@link asyncFlatMap}: the same as {@link AsyncMapOptions}.
+ */
+export type AsyncFlatMapOptions = AsyncMapOptions;
+
+/**
  * Options for {@link asyncMap} and {@link asyncFlatMap}.
  */
 export interface AsyncMapOptions {
@@ -215,7 +220,7 @@ export async function asyncFilterInPlace<T>(array: T[], predicate: (value: T, in
 export async function asyncFlatMap<T, U>(
   array: T[],
   callback: (value: T, index: number, array: T[]) => Promisable<U[]>,
-  options?: AsyncMapOptions
+  options?: AsyncFlatMapOptions
 ): Promise<U[]> {
   const nestedResults = await asyncMap(array, callback, options);
   return nestedResults.flat();
@@ -246,16 +251,14 @@ export async function asyncMap<T, U>(
   options?: AsyncMapOptions
 ): Promise<U[]> {
   const concurrency = options?.concurrency ?? Infinity;
-  if (concurrency !== Infinity && (!Number.isInteger(concurrency) || concurrency < 1)) {
+  if (concurrency !== Infinity && (!Number.isSafeInteger(concurrency) || concurrency < 1)) {
     throw new RangeError(`concurrency must be a positive integer or Infinity, got ${String(concurrency)}`);
   }
 
-  if (concurrency === Infinity && !options?.abortSignal) {
+  return concurrency === Infinity && !options?.abortSignal
     // eslint-disable-next-line unicorn/no-array-callback-reference -- Passing `callback` straight through is the contract: it is declared as `(value, index, array)` so that it receives exactly what `Array#map` supplies. Wrapping it to take only the value would quietly stop forwarding the other two.
-    return await promiseAllSequentially(array.map(callback));
-  }
-
-  return await asyncMapBounded(array, callback, concurrency, options?.abortSignal ?? abortSignalNever());
+    ? await promiseAllSequentially(array.map(callback))
+    : await asyncMapBounded(array, callback, concurrency, options?.abortSignal ?? abortSignalNever());
 }
 
 /**
@@ -997,19 +1000,21 @@ async function asyncMapBounded<T, U>(
         try {
           results[index] = await callback(array[index] as T, index, array);
         } catch (error) {
-          if (!isStopped) {
-            stop();
-            reject(error as Error);
-          }
+          // A promise settles once, so a later failure or the abort reason after this one is ignored.
+          stop();
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- Rejecting with whatever the callback threw, as `Promise.all` does.
+          reject(error);
           return;
         }
       }
 
       activeWorkerCount--;
-      if (activeWorkerCount === 0 && !isStopped) {
-        stop();
-        resolve(results);
+      if (activeWorkerCount !== 0) {
+        return;
       }
+
+      stop();
+      resolve(results);
     }
   });
 }
