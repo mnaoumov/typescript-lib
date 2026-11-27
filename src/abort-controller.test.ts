@@ -69,12 +69,15 @@ describe('abortSignalTimeout', () => {
     expect(signal.aborted).toBe(false);
   });
 
-  it('should abort after the specified timeout elapses', async () => {
-    const signal = abortSignalTimeout(50);
-    await new Promise((resolve) => {
-      window.setTimeout(resolve, 100);
-    });
-    expect(signal.aborted).toBe(true);
+  it('should abort after the specified timeout elapses', () => {
+    vi.useFakeTimers();
+    try {
+      const signal = abortSignalTimeout(50);
+      vi.advanceTimersByTime(50);
+      expect(signal.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('should not abort before the timeout elapses', () => {
